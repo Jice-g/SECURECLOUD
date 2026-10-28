@@ -1,0 +1,11 @@
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/sc_domain.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/SecureCloud_Client.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/edit_cache.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/list_install_components.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/install.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/install/local.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/sc_domain_autogen_timestamp_deps.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/sc_domain_autogen.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/SecureCloud_Client_autogen_timestamp_deps.dir
+C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/CMakeFiles/SecureCloud_Client_autogen.dir

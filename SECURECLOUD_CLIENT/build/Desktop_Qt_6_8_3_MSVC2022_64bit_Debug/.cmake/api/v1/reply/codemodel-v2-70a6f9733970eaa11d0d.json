@@ -1,0 +1,106 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-505594044a4f4f9c7809.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "SecureCloud_Client",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "SecureCloud_Client::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SecureCloud_Client-Debug-b0a3a4c760229b3e7169.json",
+					"name" : "SecureCloud_Client",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SecureCloud_Client_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SecureCloud_Client_autogen-Debug-0e7a43e52b1e1827cf73.json",
+					"name" : "SecureCloud_Client_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SecureCloud_Client_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SecureCloud_Client_autogen_timestamp_deps-Debug-5dd576c0ce6855a4898f.json",
+					"name" : "SecureCloud_Client_autogen_timestamp_deps",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sc_domain::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sc_domain-Debug-9a7a630581f79545743a.json",
+					"name" : "sc_domain",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sc_domain_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sc_domain_autogen-Debug-f8c197b772b4af3a27c5.json",
+					"name" : "sc_domain_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sc_domain_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sc_domain_autogen_timestamp_deps-Debug-ebfe29e59f80560196ad.json",
+					"name" : "sc_domain_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug",
+		"source" : "C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

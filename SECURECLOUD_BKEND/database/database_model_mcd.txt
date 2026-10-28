@@ -1,0 +1,107 @@
+// token connexion  ping
+
+
+
+LIST ROLE : "ADMIN", "ORGA", "STD_USER"
+
+enum OnlineStatus 
+        ONLINE
+        OFFLINE
+        AWAY
+    
+
+' =================================
+'    TABLES :
+' =================================
+
+
+TABLE app_user 
+	user_id : PK AUTO,
+	user_login : STRING  NN,
+	user_role: IN ROLE   NN,
+	last_log : DateTime  NULL,
+	online_status : OnlineStatus NN, // ping Passerelle ??
+	pswd_hash : BIGINT  NN,
+	contact_sheet : contact(contact_id)
+	
+	
+
+TABLE contact 
+	contact_id : PK AUTO
+	user_id : FK > app_user(user_id) NN,
+	first_name : String <encrypted>  NULL,
+	last_name : String <encrypted>	 NN,
+	info : String <encrypted>        NULL,
+	phone_num : String <encrypted>  NULL,
+	profession : String <encrypted>  NN,
+	company : String, <encrypted>    NULL,
+	last_log : DateTime              NULL,
+	created_at : DateTime            NN
+	
+
+
+
+'	MESSAGES & CONVERSATIONS
+' -------------------------------------
+
+TABLE message 
+	message_id : PK AUTO,
+	conversation_id : FK > conversation(convers_id) NN,  // ??? direct ou pas ? NoSQL json conversation ??
+	sender_id : app_user(user_id) NN
+	opaque_content : String, NULL
+	created_at : DateTime NN,
+	attachments : Integer	NN,
+	status : String  NN,
+	priority : String NN default=LOW,
+	
+
+TABLE attachement 
+	attach_id : PK AUTO,
+	path : String NN,
+	type_ext : String NN, // txt, docx, jpg, etc. ou undef.
+	weight : Integer NN
+
+
+TABLE message_attachments 
+	msg_id : FK > message(messages_id) NN
+	attached_id :FK > attachment(attach_id) NN
+
+
+
+TABLE direct_convers 
+	direct_conv_id : PK AUTO,
+	user1 : FK > app_user(user_id)	NN
+	user2 : FK > app_user(user_id)	NN
+	
+
+TABLE group_convers 
+	group_conv_id : PK AUTO,
+	title : String NN,
+	coord_id : FK > app_user(user_id)  NN
+	json_link : String NN,
+
+
+TABLE user_grp_conversation
+	app_user_fk : FK > app_user(user_id) NN,
+	grp_conv_fk : FK > group_convers(group_conv_id) NN
+
+
+
+
+	
+	
+		
+
+
+==============================
+
+app_user[1,1]-[1,1]contact
+
+app_user[0,N]- [1,N]direct_convers
+
+message[1,1]-[1,N]conversation
+
+user_app[0,N] - [2,2]
+
+
+

@@ -1,0 +1,173 @@
+/********************************************************************************
+** Form generated from reading UI file 'clientchatwindow.ui'
+**
+** Created by: Qt User Interface Compiler version 6.8.3
+**
+** WARNING! All changes made in this file will be lost when recompiling UI file!
+********************************************************************************/
+
+#ifndef UI_CLIENTCHATWINDOW_H
+#define UI_CLIENTCHATWINDOW_H
+
+#include <QtCore/QVariant>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextBrowser>
+#include <QtWidgets/QWidget>
+
+QT_BEGIN_NAMESPACE
+
+class Ui_ClientChatWindow
+{
+public:
+    QWidget *centralwidget;
+    QPushButton *Btn_Send;
+    QLabel *Label_1;
+    QTextBrowser *conversationBrowser;
+    QLabel *labelContact;
+    QLabel *Label_2;
+    QLineEdit *findContactEdit;
+    QPushButton *FindContact;
+    QPlainTextEdit *plainTextEdit;
+    QListWidget *listContact;
+    QFrame *frame_2;
+    QTextBrowser *dataCtrlBox;
+    QMenuBar *menubar;
+    QStatusBar *statusbar;
+
+    void setupUi(QMainWindow *ClientChatWindow)
+    {
+        if (ClientChatWindow->objectName().isEmpty())
+            ClientChatWindow->setObjectName("ClientChatWindow");
+        ClientChatWindow->resize(800, 600);
+        QPalette palette;
+        QBrush brush(QColor(0, 0, 0, 255));
+        brush.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        QBrush brush1(QColor(144, 179, 156, 255));
+        brush1.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Active, QPalette::Dark, brush1);
+        QBrush brush2(QColor(201, 206, 222, 255));
+        brush2.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Active, QPalette::Window, brush2);
+        palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
+        palette.setBrush(QPalette::Inactive, QPalette::Dark, brush1);
+        palette.setBrush(QPalette::Inactive, QPalette::Window, brush2);
+        palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
+        palette.setBrush(QPalette::Disabled, QPalette::Dark, brush1);
+        palette.setBrush(QPalette::Disabled, QPalette::Text, brush1);
+        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, brush1);
+        palette.setBrush(QPalette::Disabled, QPalette::Base, brush2);
+        palette.setBrush(QPalette::Disabled, QPalette::Window, brush2);
+        ClientChatWindow->setPalette(palette);
+        ClientChatWindow->setStyleSheet(QString::fromUtf8(""));
+        centralwidget = new QWidget(ClientChatWindow);
+        centralwidget->setObjectName("centralwidget");
+        Btn_Send = new QPushButton(centralwidget);
+        Btn_Send->setObjectName("Btn_Send");
+        Btn_Send->setGeometry(QRect(420, 510, 81, 31));
+        Btn_Send->setCursor(QCursor(Qt::CursorShape::PointingHandCursor));
+        Btn_Send->setStyleSheet(QString::fromUtf8(""));
+        Btn_Send->setCheckable(false);
+        Btn_Send->setFlat(false);
+        Label_1 = new QLabel(centralwidget);
+        Label_1->setObjectName("Label_1");
+        Label_1->setGeometry(QRect(21, 61, 62, 20));
+        QFont font;
+        font.setBold(true);
+        Label_1->setFont(font);
+        conversationBrowser = new QTextBrowser(centralwidget);
+        conversationBrowser->setObjectName("conversationBrowser");
+        conversationBrowser->setGeometry(QRect(20, 90, 391, 351));
+        QFont font1;
+        font1.setFamilies({QString::fromUtf8("Lucida Sans Unicode")});
+        font1.setPointSize(10);
+        conversationBrowser->setFont(font1);
+        labelContact = new QLabel(centralwidget);
+        labelContact->setObjectName("labelContact");
+        labelContact->setGeometry(QRect(100, 60, 90, 20));
+        Label_2 = new QLabel(centralwidget);
+        Label_2->setObjectName("Label_2");
+        Label_2->setGeometry(QRect(420, 60, 121, 29));
+        Label_2->setFont(font);
+        findContactEdit = new QLineEdit(centralwidget);
+        findContactEdit->setObjectName("findContactEdit");
+        findContactEdit->setGeometry(QRect(530, 60, 211, 28));
+        FindContact = new QPushButton(centralwidget);
+        FindContact->setObjectName("FindContact");
+        FindContact->setGeometry(QRect(749, 60, 41, 29));
+        FindContact->setCursor(QCursor(Qt::CursorShape::PointingHandCursor));
+        FindContact->setStyleSheet(QString::fromUtf8(""));
+        FindContact->setCheckable(false);
+        FindContact->setFlat(false);
+        plainTextEdit = new QPlainTextEdit(centralwidget);
+        plainTextEdit->setObjectName("plainTextEdit");
+        plainTextEdit->setGeometry(QRect(20, 460, 391, 85));
+        listContact = new QListWidget(centralwidget);
+        listContact->setObjectName("listContact");
+        listContact->setGeometry(QRect(420, 90, 371, 121));
+        frame_2 = new QFrame(centralwidget);
+        frame_2->setObjectName("frame_2");
+        frame_2->setGeometry(QRect(0, 0, 801, 51));
+        frame_2->setStyleSheet(QString::fromUtf8(" background-color: rgb(225, 199, 255);"));
+        frame_2->setFrameShape(QFrame::Shape::StyledPanel);
+        frame_2->setFrameShadow(QFrame::Shadow::Raised);
+        dataCtrlBox = new QTextBrowser(centralwidget);
+        dataCtrlBox->setObjectName("dataCtrlBox");
+        dataCtrlBox->setGeometry(QRect(420, 230, 371, 211));
+        QPalette palette1;
+        QBrush brush3(QColor(161, 235, 3, 255));
+        brush3.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Active, QPalette::Text, brush3);
+        QBrush brush4(QColor(87, 108, 90, 255));
+        brush4.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Active, QPalette::Base, brush4);
+        palette1.setBrush(QPalette::Inactive, QPalette::Text, brush3);
+        palette1.setBrush(QPalette::Inactive, QPalette::Base, brush4);
+        dataCtrlBox->setPalette(palette1);
+        QFont font2;
+        font2.setFamilies({QString::fromUtf8("Lucida Console")});
+        font2.setBold(false);
+        dataCtrlBox->setFont(font2);
+        dataCtrlBox->setFrameShape(QFrame::Shape::Box);
+        ClientChatWindow->setCentralWidget(centralwidget);
+        menubar = new QMenuBar(ClientChatWindow);
+        menubar->setObjectName("menubar");
+        menubar->setGeometry(QRect(0, 0, 800, 21));
+        ClientChatWindow->setMenuBar(menubar);
+        statusbar = new QStatusBar(ClientChatWindow);
+        statusbar->setObjectName("statusbar");
+        ClientChatWindow->setStatusBar(statusbar);
+
+        retranslateUi(ClientChatWindow);
+
+        QMetaObject::connectSlotsByName(ClientChatWindow);
+    } // setupUi
+
+    void retranslateUi(QMainWindow *ClientChatWindow)
+    {
+        ClientChatWindow->setWindowTitle(QCoreApplication::translate("ClientChatWindow", "Client_ChatWindow", nullptr));
+        Btn_Send->setText(QCoreApplication::translate("ClientChatWindow", "Send", nullptr));
+        Label_1->setText(QCoreApplication::translate("ClientChatWindow", "Contact :", nullptr));
+        labelContact->setText(QCoreApplication::translate("ClientChatWindow", "Abdelrahman", nullptr));
+        Label_2->setText(QCoreApplication::translate("ClientChatWindow", "Contacts book :", nullptr));
+        FindContact->setText(QCoreApplication::translate("ClientChatWindow", "Find", nullptr));
+    } // retranslateUi
+
+};
+
+namespace Ui {
+    class ClientChatWindow: public Ui_ClientChatWindow {};
+} // namespace Ui
+
+QT_END_NAMESPACE
+
+#endif // UI_CLIENTCHATWINDOW_H

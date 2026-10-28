@@ -1,0 +1,43 @@
+// =============================================================================
+// std::hash specializations
+// =============================================================================
+//
+// These specializations allow the ID types to be used as keys in
+// std::unordered_map and std::unordered_set. They must live in the
+// `std` namespace (a rare, legal exception for user-defined types).
+
+namespace std {
+
+/// @brief Hash specialization for domain::UserId.
+template <>
+struct hash<domain::UserId> {
+    std::size_t operator()(const domain::UserId& id) const noexcept {
+        return std::hash<std::string>{}(id.value());
+    }
+};
+
+/// @brief Hash specialization for domain::MessageId.
+template <>
+struct hash<domain::MessageId> {
+    std::size_t operator()(const domain::MessageId& id) const noexcept {
+        return std::hash<std::string>{}(id.value());
+    }
+};
+
+/// @brief Hash specialization for domain::ConversationId.
+template <>
+struct hash<domain::ConversationId> {
+    std::size_t operator()(const domain::ConversationId& id) const noexcept {
+        return std::hash<std::string>{}(id.value());
+    }
+};
+
+/// @brief Hash specialization for domain::AttachmentId.
+template <>
+struct hash<domain::AttachmentId> {
+    std::size_t operator()(const domain::AttachmentId& id) const noexcept {
+        return std::hash<std::string>{}(id.value());
+    }
+};
+
+} // namespace std

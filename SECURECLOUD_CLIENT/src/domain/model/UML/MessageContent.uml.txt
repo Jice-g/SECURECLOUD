@@ -1,0 +1,13 @@
+
+
+namespace Domain/Model {
+
+
+class MessageContent {
+    - text : String
+    + MessageContent(text : String)
+    + value() : String
+}
+
+
+}

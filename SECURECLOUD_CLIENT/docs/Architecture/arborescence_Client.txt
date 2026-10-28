@@ -1,0 +1,90 @@
+
+
+## Arborescence Client
+
+SecureCloud-Client/
+├── CMakeLists.txt              # The only build file you need
+├── README.md
+├── LICENSE
+├── CHANGELOG.md
+├── .gitignore
+├── .gitattributes
+│
+├── docs/                       # ADRs, UML, Specs...
+│   ├── school_vision/
+│   ├── specifications/
+│   ├── decisions/
+│   ├── domain/
+│   ├── architecture/
+│   ├── tests/
+│   └── technics/                 # experimental code
+│
+├── assets/                     # Icons, Images, QSS...
+│
+├── tests/                      # Test files
+│   ├── domain_tests/
+│   ├── application_tests/
+│   ├── integration_tests/
+│   └── spikes/                 # experimental code
+│
+└── src/
+    ├── main.cpp                # Entry point (setup)
+    │
+    ├── domain/
+    │   ├── model/                  # ← Entities + Value Objects
+    │   │   ├── Enums.h
+    │   │   ├── TimeStamp.h
+    │   │   ├── User.h
+    │   │   ├── UserId.h
+    │   │   ├── UserLogin.h
+    │   │   ├── UserLogin.cpp
+    │   │   ├── MessageContent.h
+    │   │   ├── User.h / .cpp
+    │   │   ├── MessageContent.h / .cpp
+    │   │   ├── Conversation.h / .cpp
+    │   │   ├── Attachment.h / .cpp
+    │   │   └── Alert.h / .cpp
+    │   │
+    │   ├── repositories/           # ← Interfaces
+    │   │   ├── IUserRepository.h
+    │   │   ├── IMessageRepository.h
+    │   │   └── IConversationRepository.h
+    │   │
+    │   └── services/               # ← Behavior
+    │       ├── MessagingService.h / .cpp
+    │       └── AlertService.h / .cpp
+    │
+    ├── application/            
+    │   ├── SendMessageUseCase.h/.cpp
+    │   ├── LoginUserUseCase.h/.cpp
+    │   ├── MessageDTO.h
+    │   ├── UserDTO.h
+    │   ├── ITransport.h        # Port
+    │   ├── ICryptoProvider.h   # Port
+    │   ├── ILocalStorage.h     # Port
+    │   ├── MessageMapper.h/.cpp
+    │   └── SessionManager.h/.cpp
+    │
+    ├── infrastructure/         
+    │   ├── WebSocketClient.h/.cpp
+    │   ├── LibSodiumProvider.h/.cpp
+    │   ├── SQLiteRepository.h/.cpp
+    │   └── JwtManager.h/.cpp
+    │
+    └── ui/                     
+        ├── ChatWindow.h
+        ├── ChatWindow.cpp
+        ├── ChatWindow.ui
+        ├── LoginWindow.h
+        ├── LoginWindow.cpp
+        ├── LoginWindow.ui
+        ├── ContactBookWindow.h
+        ├── ContactBookWindow.cpp
+        ├── ContactBookWindow.ui
+        ├── Attachment.h
+        ├── Attachement.cpp
+        ├── Attachement.ui
+        ├── SettingsWindow.h
+        ├── SettingsWindow.ui
+        ├── MessageListModel.h
+        └── MessageListModel.cpp

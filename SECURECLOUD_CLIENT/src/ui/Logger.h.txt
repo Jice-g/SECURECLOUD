@@ -1,0 +1,10 @@
+
+
+
+void ClientChatWindow::logInfo(const QString& msg)
+{
+    ui->dataCtrlBox->append(
+        QString("<span style='color:#00FF00'>[INFO]</span> %1")
+            .arg(msg)
+    );
+}

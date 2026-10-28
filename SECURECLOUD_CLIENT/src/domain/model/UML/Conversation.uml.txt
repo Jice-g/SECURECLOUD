@@ -1,0 +1,59 @@
+
+
+
+namespace Domain/Model {
+
+enum ConversationType { DIRECT, GROUP }
+
+class Conversation {
+    - id           : ConversationId
+    - type         : ConversationType
+    - title        : String
+    - participants : List<UserId>
+    - createdAt    : Timestamp
+
+    + Conversation(id : ConversationId, type : ConversationType, title : String, createdAt : Timestamp)
+    + id() : ConversationId
+    + type() : ConversationType
+    + title() : String
+    + participants() : List<UserId>
+    + createdAt() : Timestamp
+
+    + addParticipant(userId : UserId) : void
+    + removeParticipant(userId : UserId) : void
+    
+    + isDirect() : Boolean
+    + isGroup() : Boolean
+    + hasParticipant(userId : UserId) : Boolean
+}
+
+
+
+
+
+-------------------------------------
+namespace Domain/Model {
+
+class Conversation {
+    - id : ConversationId
+    - type : ConversationType
+    - title : String
+    - participants : List<UserId>
+    - createdAt : DateTime
+
+    + Conversation(id : ConversationId, type : ConversationType, title : String)
+    + id() : ConversationId
+    + type() : ConversationType
+    + title() : String
+    + participants() : List<UserId>
+    + createdAt() : DateTime
+
+    + addParticipant(userId : UserId) : void
+    + removeParticipant(userId : UserId) : void
+    + isDirect() : Boolean
+    + isGroup() : Boolean
+    + hasParticipant(userId : UserId) : Boolean
+}
+
+
+}

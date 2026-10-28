@@ -1,0 +1,24 @@
+
+namespace Domain/Model {
+
+class User {
+    - id : UserId
+    - login : Login
+    - role : UserRole
+    - presence : PresenceStatus
+    - createdAt : DateTime
+
+    + User(id : UserId, login : Login, role : UserRole)
+    + id() : UserId
+    + login() : Login
+    + role() : UserRole
+    + presence() : PresenceStatus
+    + createdAt() : DateTime
+
+    + setPresence(newStatus : PresenceStatus) : void
+    + isOnline() : Boolean
+    + isAdmin() : Boolean
+}
+
+
+}

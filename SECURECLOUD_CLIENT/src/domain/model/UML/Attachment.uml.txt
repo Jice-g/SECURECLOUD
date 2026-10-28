@@ -1,0 +1,19 @@
+
+namespace Domain/Model {
+
+class Attachment {
+    - id : AttachmentId
+    - fileName : String
+    - sizeBytes : Integer
+    - mimeType : String
+
+    + Attachment(id : AttachmentId, fileName : String, sizeBytes : Integer, mimeType : String)
+    + id() : AttachmentId
+    + fileName() : String
+    + sizeBytes() : Integer
+    + mimeType() : String
+    + isImage() : Boolean
+    + isDocument() : Boolean
+}
+
+}
