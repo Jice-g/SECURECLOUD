@@ -1,4 +1,5 @@
-﻿
+﻿#pragma once
+
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -26,11 +27,6 @@
 
 namespace domain {
 
-/// @brief Value Object representing a normalized user Login.
-/// @details Normalized to lowercase and allowed characters :
-///  - UserLogin may be set or reset.
-/// No one should inherit from this class to avoid breaking the invariants (==> final).
-/// 
 class UserLogin final {
 	
  private:

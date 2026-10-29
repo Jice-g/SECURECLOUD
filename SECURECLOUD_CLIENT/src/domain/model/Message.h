@@ -101,7 +101,7 @@ public:
     const TimeStamp& createdAt() const noexcept
     { return m_createdAt; }
 
-    const TimeStamp& sentAt() const noexcept
+    const std::optional<TimeStamp>& sentAt() const noexcept
     { return m_sentAt; }
 
     Priority priority() const noexcept

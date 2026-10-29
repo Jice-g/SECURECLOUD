@@ -20,6 +20,19 @@ endif()
 # 1. Domain library (pure C++, NO Qt)
 # =============================================================================
 add_library(sc_domain STATIC
+    #  Headers  ----
+    src/domain/model/Enums.h
+    src/domain/model/MessageContent.h
+    src/domain/model/TimeStamp.h
+    src/domain/model/User.h
+    src/domain/model/UserId.h    
+    src/domain/model/UserLogin.h
+    src/domain/model/Conversation.h
+    src/domain/model/ConversationId.h
+    src/domain/model/AttachmentId.h
+    src/domain/model/Message.h
+    src/domain/model/MessageId.h     
+    # Sources  ----
     src/domain/model/Message.cpp
     src/domain/model/UserLogin.cpp
 )

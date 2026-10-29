@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "domain/model/Enums.h"
+﻿#include "domain/model/Enums.h"
 #include "domain/model/UserLogin.h"
 #include <cctype>
 

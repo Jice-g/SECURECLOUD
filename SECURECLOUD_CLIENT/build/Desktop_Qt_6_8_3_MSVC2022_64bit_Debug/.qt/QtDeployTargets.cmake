@@ -1,5 +1,0 @@
-set(__QT_DEPLOY_TARGET_sc_domain_FILE C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/sc_domain.lib)
-set(__QT_DEPLOY_TARGET_sc_domain_TYPE STATIC_LIBRARY)
-set(__QT_DEPLOY_TARGET_SecureCloud_Client_FILE C:/Users/Utilisateur/Documents/BACHELOR IT/PROJETS/SECURECLOUD_CLIENT/build/Desktop_Qt_6_8_3_MSVC2022_64bit_Debug/SecureCloud_Client.exe)
-set(__QT_DEPLOY_TARGET_SecureCloud_Client_TYPE EXECUTABLE)
-set(__QT_DEPLOY_TARGET_SecureCloud_Client_RUNTIME_DLLS C:/Qt/6.8.3/msvc2022_64/bin/Qt6Widgetsd.dll;C:/Qt/6.8.3/msvc2022_64/bin/Qt6Guid.dll;C:/Qt/6.8.3/msvc2022_64/bin/Qt6Cored.dll)

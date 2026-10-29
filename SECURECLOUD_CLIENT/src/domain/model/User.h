@@ -25,7 +25,6 @@ class User final {
         UserRole m_role;
         OnlineStatus m_presence = OnlineStatus::OFFLINE;
         TimeStamp m_createdAt = TimeStamp::now();
-        std::optional<TimeStamp> m_lastLoggedAt;  // May be empty at the creation, updated when the user logs in.
 
     public:
 
@@ -81,40 +80,21 @@ class User final {
         { return m_createdAt; }
 
 
-        /// @brief Returns the timestamp of the user's last login.
-        /// @returns The timestamp of the user's last login.
-        /// If the user has never logged in, it throws a std::logic_error.
-        ///  - <!> In wich case, the caller should handle the exception appropriately.
-        ///  - The UI should display a message indicating that the user has never logged in.
-        ///
-        [[nodiscard]]
-        const std::optional<TimeStamp>& lastLoggedAt() const noexcept
-           {  return m_lastLoggedAt; }
-
-
-        // Mutators (setters) for the User attributes :
+       // Mutators (setters) for the User attributes :
 
         void Online()
         {   m_presence = OnlineStatus::ONLINE;
-            newLastLogin(); // Update the last login timestamp when the user goes online
-            m_hasLoggedIn = true; // Mark that the user has logged in at least once
         }
 
         void Offline()
         {
             m_presence = OnlineStatus::OFFLINE;
-            newLastLoggedAt(); // Update the last login timestamp when the user goes offline
-        }
+         }
 
         void Away()
         {
             if (m_presence == OnlineStatus::ONLINE) // Allow setting to AWAY when the user is currently ONLINE
             m_presence = OnlineStatus::AWAY;
-        }
-
-        void newLastLoggedAt()
-        {
-            m_lastLoggedAt = TimeStamp::now();
         }
 
         void setRole(UserRole newRole)

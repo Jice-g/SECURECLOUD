@@ -39,7 +39,8 @@ static int g_totalChecks = 0;
     do {                                                                         \
         ++g_checksInCurrentTest;											     \
 		++g_totalChecks;                                                         \
-        if (!(cond)) {                                                           \   ++g_failuresInCurrentTest;                                               \
+        if (!(cond)) {                                                           \
+            ++g_failuresInCurrentTest;                                           \
             std::cerr << "\n    CHECK FAILED " << __FILE__ << ":" << __LINE__    \
                       << "  " << #cond << std::endl;                             \
         }                                                                        \

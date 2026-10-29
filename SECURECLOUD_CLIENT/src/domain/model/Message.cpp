@@ -6,10 +6,10 @@
 namespace domain {
 
 void Message::markAsBuffered() {
-    if (m_status != MessageStatus::DRAFTED || m_status != MessageStatus::UNDELIVERED ) {
+    if (m_status != MessageStatus::DRAFTED && m_status != MessageStatus::UNDELIVERED ) {
         throw std::logic_error("Only DRAFTED or UNDELIVERED messages can transition to BUFFERED");
     }
-    m_status = MessageStatus::SENDING;
+    m_status = MessageStatus::BUFFERED;
 }
 
 void Message::markAsSending() {
@@ -49,13 +49,16 @@ void Message::markAsRead(){
 }
 
 void Message::editContent(const MessageContent& newContent) {
-    if (m_status != MessageStatus::BUFFERED) {
-        throw std::logic_error("Only BUFFERED messages can be edited");
+    if (m_status != MessageStatus::DRAFTED) {
+        throw std::logic_error("Only DRAFTED messages can be edited");
     }
     m_content = newContent;
 }
 
 void Message::addAttachment(const AttachmentId& attachmentId) {
+    if (m_status != MessageStatus::DRAFTED ) {
+        throw std::logic_error("Message has been BUFFERED yet");
+    }
     auto it = std::find(m_attachments.begin(), m_attachments.end(), attachmentId);
     if (it != m_attachments.end()) {
         throw std::invalid_argument("Attachment is already linked to this message");
@@ -64,6 +67,9 @@ void Message::addAttachment(const AttachmentId& attachmentId) {
 }
 
 void Message::removeAttachment(const AttachmentId& attachmentId) {
+    if (m_status != MessageStatus::DRAFTED ) {
+        throw std::logic_error("Message has been BUFFERED yet");
+    }
     auto it = std::find(m_attachments.begin(), m_attachments.end(), attachmentId);
     if (it == m_attachments.end()) {
         throw std::invalid_argument("Attachment not found in this message");
