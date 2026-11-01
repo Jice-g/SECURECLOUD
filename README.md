@@ -87,6 +87,4 @@ Les exigences absolues du cahier des charges (« inviolable », « zéro panne �
 
 Abdelrahmane Amiri · Sana Bouchal · Jean-Christophe Gerace
 
-## Licence
 
-Voir le fichier `LICENSE`.

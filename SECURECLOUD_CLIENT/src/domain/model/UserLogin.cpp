@@ -4,24 +4,26 @@
 
 namespace domain {
 
-    std::string UserLogin::cleanws(const std::string& s)
+    std::string UserLogin::trim(const std::string& s)
     {
-        std::string result;
-        result.reserve(s.size());   // one allocation, enough for the worst case
+        // lambda used below to check wether a char in the string s is a space
+        auto isSpace = [](char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; };
 
-        for (size_t i = 0; i < s.size(); ++i)
-        {
-            if (std::isspace(static_cast<unsigned char>(s[i])) == 0) {
-                result += s[i];
-            }
-        }
+        // while first char is a space 
+        std::size_t first = 0;
+        while (first < s.size() && isSpace(s[first])) { ++first; }
 
-		return result;
+        // while last one is a space
+        std::size_t last = s.size();
+        while (last > first && isSpace(s[last - 1])) { --last; }
+
+        return s.substr(first, last - first);
     }
 
 
     bool UserLogin::isAllowedChar(char c)
-    {
+    {   
+        // ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789_-."
         if (UserLogin::ALLOWED_CHARS.find(c) == std::string_view::npos) {
 			return false;
 		}
@@ -81,12 +83,11 @@ namespace domain {
     /// 
     UserLogin& UserLogin::operator=(const std::string& input)
     {
-        std::string new_value = toLower(cleanws(input));
+        std::string new_value = toLower(trim(input));
 
         // If the value is invalid, validate() throws and m_value is left unchanged.
-        // try .. catch instruction is ecessary to catch the exception and rethrow it when UserLogin is set by construction or assignment.
+        // try .. catch instruction is necessary to catch the exception and rethrow it when UserLogin is set by construction or assignment.
 		validate(new_value);
-
         m_value = std::move(new_value);
         return *this;
     }

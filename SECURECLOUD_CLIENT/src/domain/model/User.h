@@ -23,8 +23,8 @@ class User final {
         UserId m_id;
         UserLogin m_login;
         UserRole m_role;
-        OnlineStatus m_presence = OnlineStatus::OFFLINE;
         TimeStamp m_createdAt = TimeStamp::now();
+        OnlineStatus m_presence = OnlineStatus::OFFLINE;
 
     public:
 
@@ -44,23 +44,23 @@ class User final {
         // Accessors (getters) for the User attributes :
 
         [[nodiscard]]
-        const UserId& Id() const noexcept
+        const UserId& id() const noexcept
         { return m_id; }
 
         [[nodiscard]]
-        const UserLogin& Login() const noexcept
+        const UserLogin& login() const noexcept
         { return m_login; }
 
         [[nodiscard]]
-        UserRole Role() const noexcept
+        UserRole role() const noexcept
         { return m_role; }
 
         [[nodiscard]]
-        OnlineStatus Presence() const noexcept
+        OnlineStatus presence() const noexcept
         { return m_presence; }
 
         [[nodiscard]]
-        bool IsOnline() const noexcept
+        bool isOnline() const noexcept
         {
             if (m_presence == OnlineStatus::ONLINE){
                 return true; }
@@ -68,7 +68,7 @@ class User final {
         }
 
         [[nodiscard]]
-        bool IsOffline() const noexcept
+        bool isOffline() const noexcept
         {
             if (m_presence == OnlineStatus::OFFLINE){
                 return true; }
@@ -76,22 +76,22 @@ class User final {
         }
 
         [[nodiscard]]
-        const TimeStamp& CreatedAt() const noexcept
+        const TimeStamp& createdAt() const noexcept
         { return m_createdAt; }
 
 
        // Mutators (setters) for the User attributes :
 
-        void Online()
+        void onLine()
         {   m_presence = OnlineStatus::ONLINE;
         }
 
-        void Offline()
+        void offLine()
         {
             m_presence = OnlineStatus::OFFLINE;
          }
 
-        void Away()
+        void away()
         {
             if (m_presence == OnlineStatus::ONLINE) // Allow setting to AWAY when the user is currently ONLINE
             m_presence = OnlineStatus::AWAY;

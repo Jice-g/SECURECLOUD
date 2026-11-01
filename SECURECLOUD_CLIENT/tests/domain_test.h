@@ -7,7 +7,17 @@
 #include <string>
 #include <vector>
 
-
+#include "domain/model/Enums.h"
+#include "domain/model/UserId.h"
+#include "domain/model/MessageId.h"
+#include "domain/model/ConversationId.h"
+#include "domain/model/AttachmentId.h"
+#include "domain/model/UserLogin.h"
+#include "domain/model/MessageContent.h"
+#include "domain/model/TimeStamp.h"
+#include "domain/model/User.h"
+#include "domain/model/Conversation.h"
+#include "domain/model/Message.h"
 
 // =============================================================================
 // Minimal test harness (no dependency).
@@ -96,6 +106,7 @@ static int g_totalChecks = 0;
             g_failedTests.push_back(#testName);                                  \
         }                                                                        \
     } while (0)
+
 
 
 

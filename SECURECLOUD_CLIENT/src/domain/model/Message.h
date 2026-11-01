@@ -48,12 +48,12 @@ private:
     TimeStamp m_createdAt;
     std::optional<TimeStamp> m_sentAt;   // set by markAsSent()
     Priority m_priority;
-    MessageStatus m_status;
+    MessageStatus m_status = MessageStatus::DRAFTED;
     std::vector<AttachmentId> m_attachments;
 
 public:
 
-  /*  /// @brief Constructs a new Message in BUFFERED state.
+  /*  /// @brief Constructs a new Message in DRAFTED state.
     /// @param id The unique message identifier.
     /// @param conversationId The conversation this message belongs to.
     /// @param senderId The user who sent the message.
@@ -76,8 +76,6 @@ public:
         m_priority(priority)
 
     {
-        m_status = MessageStatus::DRAFTED; // Always starts as DRAFTED
-
         // Note: We do not enforce "content OR attachment" here because
         // attachments might be added immediately after construction.
         // The Application layer MUST check it by calling isValid() before persisting.

@@ -5,33 +5,26 @@
 #include <unordered_set>
 #include <vector>
 
-#include "domain/model/Enums.h"
-#include "domain/model/UserId.h"
-#include "domain/model/MessageId.h"
-#include "domain/model/ConversationId.h"
-#include "domain/model/AttachmentId.h"
-#include "domain/model/UserLogin.h"
-#include "domain/model/MessageContent.h"
-#include "domain/model/TimeStamp.h"
-#include "domain/model/User.h"
-#include "domain/model/Conversation.h"
-#include "domain/model/Message.h"
-
 #include "domain_test.h"
 
 using namespace domain;
+
+
 
 // =============================================================================
 // Helpers
 // =============================================================================
 
-static Message makeMessage(const std::string& text = "Hello")
+
+/// @brief Makes a new Message in order to test it
+Message makeMessage(const std::string& text = "Hello")
 {
     return Message(MessageId("m1"), ConversationId("c1"), UserId("u1"),
                    MessageContent(text), TimeStamp::now(), Priority::NORMAL);
 }
 
-/// Builds a message in the requested status by following legal transitions only.
+
+/// @brief Builds a message in the requested status by following legal transitions.
 static Message makeMessageIn(MessageStatus status) {
     Message m = makeMessage();
     switch (status) {
@@ -41,7 +34,7 @@ static Message makeMessageIn(MessageStatus status) {
     case MessageStatus::SENT:        m.markAsBuffered(); m.markAsSending(); m.markAsSent(); break;
     case MessageStatus::DELIVERED:   m.markAsBuffered(); m.markAsSending(); m.markAsSent(); m.markAsDelivered(); break;
     case MessageStatus::READ:        m.markAsBuffered(); m.markAsSending(); m.markAsSent(); m.markAsDelivered(); m.markAsRead(); break;
-  //  case MessageStatus::UNDELIVERED: m.markAsBuffered(); m.markAsSending(); m.markAsUndelivered(); m.markAsBuffered(); break;
+    case MessageStatus::UNDELIVERED: m.markAsBuffered(); m.markAsSending(); m.markAsUndelivered(); break;
     }
     return m;
 }
@@ -99,13 +92,15 @@ void test_AttachmentId_Rules() {
 // UserLogin
 // =============================================================================
 
-void test_UserLogin_Normalization() {
-    CHECK(UserLogin("  Alice  ").value() == "alice");
-    CHECK(UserLogin("ALICE").value() == "alice");
+void test_UserLogin_InternalWhitespaceIsRejected() {
+    // Decision 30/10/2026: only leading/trailing whitespace is trimmed; an internal one is an error.
+    CHECK_THROWS(UserLogin("al ice"),  std::invalid_argument);
+    CHECK_THROWS(UserLogin("al\tice"), std::invalid_argument);
+    CHECK_THROWS(UserLogin(" al ice "), std::invalid_argument);
 }
-void test_UserLogin_InternalWhitespaceIsRemoved() {
-    // Documents the CURRENT behavior ("al ice" -> "alice"). See review: to be decided.
-    CHECK(UserLogin("al ice").value() == "alice");
+void test_UserLogin_TrimsWhitespace() {
+    CHECK(UserLogin("\talice\n").value() == "alice");
+    CHECK(UserLogin(" \r\n alice \t ").value() == "alice");
 }
 void test_UserLogin_RejectsInvalidChar() {
     CHECK_THROWS(UserLogin("alice@msf"), std::invalid_argument);
@@ -198,39 +193,39 @@ static User makeUser(UserRole r = UserRole::STD_USER) {
 void test_User_Construction() {
     TimeStamp created = TimeStamp::now();
     User u(UserId("u1"), UserLogin("alice"), UserRole::STD_USER, created);
-    CHECK(u.Id() == UserId("u1"));
-    CHECK(u.Login() == UserLogin("alice"));
-    CHECK(u.Role() == UserRole::STD_USER);
-    CHECK(u.Presence() == OnlineStatus::OFFLINE);
-    CHECK(u.CreatedAt() == created);
-    CHECK(!u.IsOnline());
+    CHECK(u.id() == UserId("u1"));
+    CHECK(u.login() == UserLogin("alice"));
+    CHECK(u.role() == UserRole::STD_USER);
+    CHECK(u.presence() == OnlineStatus::OFFLINE);
+    CHECK(u.createdAt() == created);
+    CHECK(!u.isOnline());
 }
 void test_User_InitialPresenceCanBeSet() {
     User u(UserId("u1"), UserLogin("alice"), UserRole::ADMIN, TimeStamp::now(), OnlineStatus::ONLINE);
-    CHECK(u.IsOnline());
+    CHECK(u.isOnline());
 }
 void test_User_IsOfflineIsConsistent() {
     User u = makeUser();
-    CHECK(u.IsOffline()); CHECK(!u.IsOnline());
-    u.Online();
-    CHECK(!u.IsOffline()); CHECK(u.IsOnline());
-    u.Away();
-    CHECK(!u.IsOffline()); CHECK(!u.IsOnline());
+    CHECK(u.isOffline()); CHECK(!u.isOnline());
+    u.onLine();
+    CHECK(!u.isOffline()); CHECK(u.isOnline());
+    u.away();
+    CHECK(!u.isOffline()); CHECK(!u.isOnline());
 }
 
 void test_User_AwayOnlyFromOnline() {
     User u = makeUser();
-    u.Away();                                     // OFFLINE -> ignored
-    CHECK(u.Presence() == OnlineStatus::OFFLINE);
-    u.Online(); u.Away();
-    CHECK(u.Presence() == OnlineStatus::AWAY);
+    u.away();                                     // OFFLINE -> ignored
+    CHECK(u.presence() == OnlineStatus::OFFLINE);
+    u.onLine(); u.away();
+    CHECK(u.presence() == OnlineStatus::AWAY);
 }
 
 void test_User_RoleChange() {
     User u = makeUser(UserRole::STD_USER);
     u.setRole(UserRole::COORD);
-    CHECK(u.Role() == UserRole::COORD);
-    CHECK(makeUser(UserRole::ADMIN).Role() == UserRole::ADMIN);
+    CHECK(u.role() == UserRole::COORD);
+    CHECK(makeUser(UserRole::ADMIN).role() == UserRole::ADMIN);
 }
 
 // =============================================================================
@@ -243,21 +238,23 @@ void test_DirectConversation_Construction() {
     CHECK(c.id() == ConversationId("c1"));
     CHECK(c.participant1() == UserId("u1"));
     CHECK(c.participant2() == UserId("u2"));
-    CHECK(c.IsParticipating(UserId("u1")));
-    CHECK(c.IsParticipating(UserId("u2")));
-    CHECK(!c.IsParticipating(UserId("u3")));
+    CHECK(c.isParticipating(UserId("u1")));
+    CHECK(c.isParticipating(UserId("u2")));
+    CHECK(!c.isParticipating(UserId("u3")));
 }
-/*  ****
- *
- *  void test_DirectConversation_RejectsSelfChat() {
-    CHECK_THROWS(DirectConversation(ConversationId("c1"), UserId("u1"), UserId("u1"), TimeStamp::now()),
-                 std::invalid_argument);
-}*/
+void test_DirectConversation_SelfChatIsAllowed() {
+    // Decision 30/10/2026: a user may write to himself ("notes to self").
+    DirectConversation self(ConversationId("c-self"), UserId("u1"), UserId("u1"), TimeStamp::now());
+    CHECK(self.type() == ConversationType::DIRECT);
+    CHECK(self.isParticipating(UserId("u1")));
+    CHECK(!self.isParticipating(UserId("u2")));
+}
 void test_DirectConversation_SamePairIsOrderInsensitive() {
-    DirectConversation ab(ConversationId("1"), UserId("a"), UserId("b"), TimeStamp::now());
-    DirectConversation ba(ConversationId("2"), UserId("b"), UserId("a"), TimeStamp::now());
-    DirectConversation ac(ConversationId("3"), UserId("a"), UserId("c"), TimeStamp::now());
-  //  CHECK(ab.samePair(ba)); CHECK(ba.samePair(ab)); CHECK(!ab.samePair(ac));
+    UserId a("a") ; UserId b("b"); UserId c("c") ;
+    DirectConversation ab(ConversationId("1"), a, b, TimeStamp::now());
+    DirectConversation ac(ConversationId("3"), a, c, TimeStamp::now());
+    CHECK(ab.checkParticipants(a,b)) ; CHECK(ab.checkParticipants(b,a)) ;
+    CHECK(!ac.checkParticipants(a,b)); CHECK(!ac.checkParticipants(b,a));
 }
 void test_Conversation_PolymorphicUse() {
     std::vector<std::unique_ptr<Conversation>> v;
@@ -267,8 +264,8 @@ void test_Conversation_PolymorphicUse() {
     v.push_back(std::move(g));
     CHECK(v[0]->type() == ConversationType::DIRECT);
     CHECK(v[1]->type() == ConversationType::GROUP);
-    CHECK(v[0]->IsParticipating(UserId("u2")));
-    CHECK(!v[1]->IsParticipating(UserId("u2")));
+    CHECK(v[0]->isParticipating(UserId("u2")));
+    CHECK(!v[1]->isParticipating(UserId("u2")));
 }
 void test_GroupConversation_Construction() {
     GroupConversation c(ConversationId("c2"), "Project MSF", TimeStamp::now());
@@ -282,7 +279,7 @@ void test_GroupConversation_RejectsEmptyTitle() {
 void test_GroupConversation_AddParticipant() {
     GroupConversation c(ConversationId("c2"), "T", TimeStamp::now());
     c.addParticipant(UserId("u1")); c.addParticipant(UserId("u2"));
-    CHECK(c.IsParticipating(UserId("u1"))); CHECK(c.IsParticipating(UserId("u2")));
+    CHECK(c.isParticipating(UserId("u1"))); CHECK(c.isParticipating(UserId("u2")));
     CHECK(c.participants().size() == 2);
 }
 void test_GroupConversation_RejectsDuplicateParticipant() {
@@ -295,7 +292,7 @@ void test_GroupConversation_RemoveParticipant() {
     GroupConversation c(ConversationId("c2"), "T", TimeStamp::now());
     c.addParticipant(UserId("u1")); c.addParticipant(UserId("u2"));
     c.removeParticipant(UserId("u1"));
-    CHECK(!c.IsParticipating(UserId("u1"))); CHECK(c.IsParticipating(UserId("u2")));
+    CHECK(!c.isParticipating(UserId("u1"))); CHECK(c.isParticipating(UserId("u2")));
 }
 void test_GroupConversation_RejectsRemovingUnknownParticipant() {
     GroupConversation c(ConversationId("c2"), "T", TimeStamp::now());
@@ -421,7 +418,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_UserId_HashUsableInUnorderedSet);
     RUN_TEST(test_MessageId_Rules); RUN_TEST(test_ConversationId_Rules); RUN_TEST(test_AttachmentId_Rules);
 
-    RUN_TEST(test_UserLogin_Normalization); RUN_TEST(test_UserLogin_InternalWhitespaceIsRemoved);
+    RUN_TEST(test_UserLogin_InternalWhitespaceIsRejected); RUN_TEST(test_UserLogin_TrimsWhitespace);
     RUN_TEST(test_UserLogin_RejectsInvalidChar); RUN_TEST(test_UserLogin_AllowedSpecialChars);
     RUN_TEST(test_UserLogin_LengthBoundaries); RUN_TEST(test_UserLogin_EqualityCaseInsensitive);
     RUN_TEST(test_UserLogin_AssignmentValid); RUN_TEST(test_UserLogin_AssignmentInvalidKeepsOldValue);
@@ -436,15 +433,13 @@ int main(int argc, char** argv) {
     RUN_TEST(test_TimeStamp_NowAndCopy); RUN_TEST(test_TimeStamp_Ordering);
     RUN_TEST(test_Message_StartsBuffered); RUN_TEST(test_Message_FullLifecycle); RUN_TEST(test_Message_Lifecycle_UndeliveredRetry);
     RUN_TEST(test_User_Construction); RUN_TEST(test_User_InitialPresenceCanBeSet);
-    RUN_TEST(test_User_IsOfflineIsConsistent); RUN_TEST(test_User_RoleChange);
+    RUN_TEST(test_User_IsOfflineIsConsistent); test_User_AwayOnlyFromOnline(); RUN_TEST(test_User_RoleChange);
 
-    RUN_TEST(test_DirectConversation_Construction);
+    RUN_TEST(test_DirectConversation_Construction); RUN_TEST(test_DirectConversation_SelfChatIsAllowed);
     RUN_TEST(test_DirectConversation_SamePairIsOrderInsensitive); RUN_TEST(test_Conversation_PolymorphicUse);
     RUN_TEST(test_GroupConversation_Construction); RUN_TEST(test_GroupConversation_RejectsEmptyTitle);
     RUN_TEST(test_GroupConversation_AddParticipant); RUN_TEST(test_GroupConversation_RejectsDuplicateParticipant);
     RUN_TEST(test_GroupConversation_RemoveParticipant); RUN_TEST(test_GroupConversation_RejectsRemovingUnknownParticipant);
-
-    RUN_TEST(test_Message_StartsBuffered); RUN_TEST(test_Message_FullLifecycle);
     RUN_TEST(test_Message_MarkAsSentSetsSentAt); RUN_TEST(test_Message_FailedMarkAsSent_NoSentAt);
     RUN_TEST(test_Message_UndeliveredFromSendingOrSent);
     RUN_TEST(test_Message_EditContentOnlyIfDrafted); RUN_TEST(test_Message_AddAndRemoveAttachment);
