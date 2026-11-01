@@ -65,9 +65,9 @@ public:
     [[nodiscard]]
 	virtual std::vector<Message> searchText(const std::string& text, std::size_t limit) const = 0;  // F1.6
 	
-    virtual Result<bool> exists(const MessageId&) = 0;  // check duplication (UC-06)
+    virtual bool exists(const MessageId&) = 0;  // check duplication (UC-06)
 	
-    virtual Result<void> updateDeliveryStatus(const MessageId&, MessageStatus status) = 0;
+    virtual void updateDeliveryStatus(const MessageId&, MessageStatus status) = 0;
 	
 };
 

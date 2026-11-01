@@ -106,6 +106,3 @@ Le code découle de spécifications validées : **exigence → analyse → déci
 
 Le dossier `docs/` regroupe la vision du projet, les spécifications et leurs décisions (ADR), le modèle du domaine, l'architecture et la stratégie de tests.
 
-## Licence
-
-Voir le fichier `LICENSE`.
