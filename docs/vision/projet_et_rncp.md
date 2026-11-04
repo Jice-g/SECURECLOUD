@@ -19,7 +19,6 @@ Il ne décrit ni le produit (voir `vision_produit.md`) ni l'architecture.
 | Client | fictif : Médecins Sans Frontières (MSF). Le rôle du client est tenu par l'encadrement pédagogique |
 | Évaluation | présentation avec support + revue de code |
 
-> **À propos des délais.** Le cahier des charges parle de « 3 mois maximum ». C'est le délai du projet industriel imaginé, pas celui de l'école. Le délai qui s'applique à l'équipe est celui de l'école (six semaines effectives). Voir `analyse_cahier_des_charges.md`.
 
 ## 2. Objectifs pédagogiques
 
@@ -50,7 +49,6 @@ Ce sont **les attendus réels** du projet. Toute fonctionnalité du cahier des c
 | | Démarche de résolution de problème | Analyse critique du cahier des charges, registre des décisions |
 | | Apprendre en continu | Guides pédagogiques (par exemple `UC1_Connexion.md`) |
 
-> **Alerte : couverture « NoSQL ».** Le référentiel cite explicitement SQL **et** NoSQL. L'organisation initiale prévoyait MongoDB côté Client ; la proposition actuelle (SQLite + SQLCipher, voir le registre des décisions du Client) l'écarte pour de bonnes raisons techniques. Il reste à **vérifier avec l'encadrement** comment cette compétence sera évaluée (par exemple un stockage document ou clé-valeur côté serveur, ou une justification argumentée du choix). Point à trancher avant de figer le stockage.
 
 ## 4. Évaluation et soutenance
 
