@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(SecureCloud_Client VERSION 0.1 LANGUAGES CXX)
 
 # --- Build options ---
-option(SC_BUILD_UI  "Build the Qt GUI (needs Qt6). Turn OFF to build/test the domain only (CI, servers)" ON)
+option(SC_BUILD_UI  "Build the Qt GUI (needs Qt6). Turn OFF to build/test the domain only (CI, servers)" OFF)
 option(SC_GUI_ONLY  "Hide the console window on Windows (release/demo builds)" OFF)
 
 # --- Global settings ---
