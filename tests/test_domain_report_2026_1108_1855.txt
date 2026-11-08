@@ -4,7 +4,7 @@ SecureCloud Client - Domain Tests Report
 
 Tests passed : 57
 Tests failed : 0
-Total checks : 164
+Total checks : 162
 
   [OK]     test_UserId_ValidConstruction
   [OK]     test_UserId_RejectsEmpty
@@ -14,8 +14,8 @@ Total checks : 164
   [OK]     test_MessageId_Rules
   [OK]     test_ConversationId_Rules
   [OK]     test_AttachmentId_Rules
-  [OK]     test_UserLogin_Normalization
-  [OK]     test_UserLogin_InternalWhitespaceIsRemoved
+  [OK]     test_UserLogin_InternalWhitespaceIsRejected
+  [OK]     test_UserLogin_TrimsWhitespace
   [OK]     test_UserLogin_RejectsInvalidChar
   [OK]     test_UserLogin_AllowedSpecialChars
   [OK]     test_UserLogin_LengthBoundaries
@@ -41,8 +41,10 @@ Total checks : 164
   [OK]     test_User_Construction
   [OK]     test_User_InitialPresenceCanBeSet
   [OK]     test_User_IsOfflineIsConsistent
+  [OK]     test_User_AwayOnlyFromOnline
   [OK]     test_User_RoleChange
   [OK]     test_DirectConversation_Construction
+  [OK]     test_DirectConversation_SelfChatIsAllowed
   [OK]     test_DirectConversation_SamePairIsOrderInsensitive
   [OK]     test_Conversation_PolymorphicUse
   [OK]     test_GroupConversation_Construction
@@ -51,8 +53,6 @@ Total checks : 164
   [OK]     test_GroupConversation_RejectsDuplicateParticipant
   [OK]     test_GroupConversation_RemoveParticipant
   [OK]     test_GroupConversation_RejectsRemovingUnknownParticipant
-  [OK]     test_Message_StartsBuffered
-  [OK]     test_Message_FullLifecycle
   [OK]     test_Message_MarkAsSentSetsSentAt
   [OK]     test_Message_FailedMarkAsSent_NoSentAt
   [OK]     test_Message_UndeliveredFromSendingOrSent

@@ -38,7 +38,7 @@ namespace domain {
         std::string m_text;
 
         /// @brief Maximum allowed length for a message content.
-        static constexpr std::size_t MAX_LENGTH = 4096;
+        static constexpr std::size_t MAX_BYTES = 4096;
 
         /// @brief Trims trailing whitespace only.
         /// @param input The string to trim.
@@ -77,7 +77,7 @@ namespace domain {
         explicit MessageContent(const std::string& text)
             : m_text(trimTrailing(text))
         {
-            if (m_text.length() > MAX_LENGTH) {
+            if (m_text.length() > MAX_BYTES) {
                 throw std::invalid_argument("MessageContent exceeds maximum length (4096)");
             }
             if (m_text.find('\0') != std::string::npos) {

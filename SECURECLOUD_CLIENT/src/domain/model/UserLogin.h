@@ -10,13 +10,14 @@
 /// @brief  Value Object representing a user Login identifier.
 ///
 /// A UserLogin is a normalized and validated identifier used for authentication.
-/// It is not the display name: the UserLogin is technical and case-sensitive, 
+/// It is not the display name: the UserLogin is technical (normalized to lowercase, so compared case-insensitively), 
 /// the "display name" is what the user sees.
 /// It will be easier to control the UserLogin format and avoid confusion if we enforce
 /// a strict format now, and not in the Application layer or elsewhere.
 ///
 /// Normalization happens when the UserLogin is set or reset:
-///   - Whitespace is trimmed.
+///   - Leading and trailing whitespace is trimmed.
+///   - Internal whitespace is NOT removed: it is an invalid character ("al ice" is rejected).
 ///   - All characters are converted to lowercase.
 ///   - Only alphanumeric characters, '_', '-', and '.' are allowed.
 ///
@@ -42,11 +43,11 @@ class UserLogin final {
 	static constexpr std::string_view ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789_-.";
 
 
-    /// @brief clean whitespace from the string.
+    /// @brief Removes the whitespace at the BEGINNING and at the END of the string only.
     /// @param s the string to trim.
-    /// @return a new string without whitespace inside
+    /// @return a new string; internal whitespace is kept (and rejected later by validate()).
     /// 
-    static std::string cleanws(const std::string& s);
+    static std::string trim(const std::string& s);
 
 
     /// @brief Checks whether a character is allowed in a UserLogin.
@@ -80,7 +81,7 @@ public:
     ///         too long, or contains disallowed characters.
     ///
     explicit UserLogin(const std::string& input)
-        : m_value(std::move(toLower(cleanws(input))))
+        : m_value(toLower(trim(input)))
     {
         // Notice : If the value is invalid, an exception is thrown and the object is not constructed.
         // try .. catch instruction is necessary to catch the exception and rethrow it when UserLogin is set by construction or assignment.
