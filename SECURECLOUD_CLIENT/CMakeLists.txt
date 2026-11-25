@@ -40,13 +40,37 @@ add_library(sc_domain STATIC
 target_include_directories(sc_domain PUBLIC src)
 
 # =============================================================================
+# 1b. Application library (pure C++20, NO Qt) : use cases, ports, session state
+# =============================================================================
+find_package(Threads REQUIRED)   # SessionManager uses std::mutex
+
+add_library(sc_application STATIC
+    #  Headers  ----
+    src/application/loginusecase/AuthError.h
+    src/application/loginusecase/AuthResult.h
+    src/application/loginusecase/AuthSession.h
+    src/application/loginusecase/LoginOutcome.h
+    src/application/loginusecase/LoginProcessDTO.h
+    src/application/loginusecase/LoginUseCase.h
+    src/application/loginusecase/SessionManager.h
+    src/application/gateway/ISessionGateway.h
+    # Sources  ----
+    src/application/loginusecase/LoginUseCase.cpp
+    src/application/loginusecase/SessionManager.cpp
+)
+# NEVER link Qt here: the Application layer stays framework-free (ADR UC1-12).
+# sc_domain is PUBLIC so that whoever links sc_application also gets the domain headers (and `src` include path).
+target_link_libraries(sc_application PUBLIC sc_domain Threads::Threads)
+
+# =============================================================================
 # 2. Domain tests (console only, no Qt) -- built in every configuration
 # =============================================================================
 enable_testing()
 
+
 add_executable(run_tests
 	tests/domain_tests/domain_test_1.cpp
-	tests/domain_test.h
+        tests/harness_test.h
 	)
 	
 target_link_libraries(run_tests PRIVATE sc_domain)
@@ -54,6 +78,30 @@ target_link_libraries(run_tests PRIVATE sc_domain)
 target_include_directories(run_tests PRIVATE tests)
 
 add_test(NAME DomainTests COMMAND run_tests ${CMAKE_BINARY_DIR}/domain_report.txt)
+
+
+# =============================================================================
+# 2b. Application tests (console only, no Qt, no network) -- built in every configuration
+#     Two executables: SessionManager has its own because it is also run under -fsanitize=thread.
+# =============================================================================
+add_executable(run_application_tests
+    tests/application_tests/application_test_1.cpp
+    tests/application_tests/fakes/FakeSessionGateway.h
+    tests/harness_test.h
+)
+target_link_libraries(run_application_tests PRIVATE sc_application)
+target_include_directories(run_application_tests PRIVATE tests)
+add_test(NAME ApplicationTests COMMAND run_application_tests ${CMAKE_BINARY_DIR}/application_report.txt)
+
+add_executable(run_session_manager_tests
+    tests/application_tests/session_manager_test.cpp
+    tests/harness_test.h
+)
+target_link_libraries(run_session_manager_tests PRIVATE sc_application)
+target_include_directories(run_session_manager_tests PRIVATE tests)
+add_test(NAME SessionManagerTests COMMAND run_session_manager_tests ${CMAKE_BINARY_DIR}/session_manager_report.txt)
+
+
 
 # =============================================================================
 # 3. Qt GUI (optional)
@@ -65,14 +113,35 @@ if(SC_BUILD_UI)
 
     find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets)
 
+    # UC1 demo backend: a scripted ISessionGateway (no network, no real authentication) so the UI
+    # can be tried before HttpsSessionGateway is integrated. Turn OFF when the real gateway is
+    # in the build (then add sc_infrastructure to target_link_libraries below). NEVER ship ON.
+    option(SC_DEMO_GATEWAY "Use the scripted DemoSessionGateway instead of the HTTPS gateway (DEMO ONLY)" ON)
+
     qt_add_executable(SecureCloud_Client
         src/main.cpp
-        src/ui/clientchatwindow.cpp
-        src/ui/clientchatwindow.h
-        src/ui/clientchatwindow.ui
+        src/ui/Theme.cpp
+        src/ui/Theme.h
+        src/ui/UiTexts.cpp
+        src/ui/UiTexts.h
+        src/ui/LoginController.cpp
+        src/ui/LoginController.h
+        src/ui/UserLoginWindow.cpp
+        src/ui/UserLoginWindow.h
+        src/ui/UserLoginWindow.ui
+        src/ui/ClientChatWindow.cpp
+        src/ui/ClientChatWindow.h
+        src/ui/ClientChatWindow.ui
+        src/infrastructure/DemoSessionGateway.h
     )
-	
-    target_link_libraries(SecureCloud_Client PRIVATE sc_domain Qt6::Widgets)
+
+    # The UI knows the Application layer (use case, session) and, through it, the Domain.
+    target_link_libraries(SecureCloud_Client PRIVATE sc_application sc_domain Qt6::Widgets)
+
+    if(SC_DEMO_GATEWAY)
+        target_compile_definitions(SecureCloud_Client PRIVATE SC_DEMO_GATEWAY=1)
+        message(WARNING "SC_DEMO_GATEWAY is ON: the client uses a FAKE login backend (demo only).")
+    endif()
 
     set_target_properties(SecureCloud_Client PROPERTIES
         MACOSX_BUNDLE TRUE
