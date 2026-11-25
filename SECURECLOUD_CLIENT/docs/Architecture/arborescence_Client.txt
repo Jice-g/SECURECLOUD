@@ -34,13 +34,12 @@ SecureCloud-Client/
     │   ├── model/                  # ← Entities + Value Objects
     │   │   ├── Enums.h
     │   │   ├── TimeStamp.h
-    │   │   ├── User.h
     │   │   ├── UserId.h
     │   │   ├── UserLogin.h
     │   │   ├── UserLogin.cpp
     │   │   ├── MessageContent.h
     │   │   ├── User.h / .cpp
-    │   │   ├── MessageContent.h / .cpp
+    │   │   ├── Message.h / .cpp
     │   │   ├── Conversation.h / .cpp
     │   │   ├── Attachment.h / .cpp
     │   │   └── Alert.h / .cpp
@@ -51,6 +50,7 @@ SecureCloud-Client/
     │   │   └── IConversationRepository.h
     │   │
     │   └── services/               # ← Behavior
+    │       ├── LogSessionService.h / .cpp
     │       ├── MessagingService.h / .cpp
     │       └── AlertService.h / .cpp
     │

@@ -1,0 +1,67 @@
+=====================================================
+SecureCloud Client - Domain Tests Report
+=====================================================
+
+Tests passed : 57
+Tests failed : 0
+Total checks : 164
+
+  [OK]     test_UserId_ValidConstruction
+  [OK]     test_UserId_RejectsEmpty
+  [OK]     test_UserId_Equality
+  [OK]     test_UserId_IsCaseSensitive
+  [OK]     test_UserId_HashUsableInUnorderedSet
+  [OK]     test_MessageId_Rules
+  [OK]     test_ConversationId_Rules
+  [OK]     test_AttachmentId_Rules
+  [OK]     test_UserLogin_Normalization
+  [OK]     test_UserLogin_InternalWhitespaceIsRemoved
+  [OK]     test_UserLogin_RejectsInvalidChar
+  [OK]     test_UserLogin_AllowedSpecialChars
+  [OK]     test_UserLogin_LengthBoundaries
+  [OK]     test_UserLogin_EqualityCaseInsensitive
+  [OK]     test_UserLogin_AssignmentValid
+  [OK]     test_UserLogin_AssignmentInvalidKeepsOldValue
+  [OK]     test_MessageContent_TrailingTrimmed
+  [OK]     test_MessageContent_LeadingPreserved
+  [OK]     test_MessageContent_InternalPreserved
+  [OK]     test_MessageContent_EmptyAllowed
+  [OK]     test_MessageContent_WhitespaceOnlyIsEmpty
+  [OK]     test_MessageContent_NotEmpty
+  [OK]     test_MessageContent_LengthBoundary
+  [OK]     test_MessageContent_TrimHappensBeforeLengthCheck
+  [OK]     test_MessageContent_RejectsNulChar
+  [OK]     test_MessageContent_LengthCountsBytesNotCharacters
+  [OK]     test_MessageContent_Equality
+  [OK]     test_TimeStamp_NowAndCopy
+  [OK]     test_TimeStamp_Ordering
+  [OK]     test_Message_StartsBuffered
+  [OK]     test_Message_FullLifecycle
+  [OK]     test_Message_Lifecycle_UndeliveredRetry
+  [OK]     test_User_Construction
+  [OK]     test_User_InitialPresenceCanBeSet
+  [OK]     test_User_IsOfflineIsConsistent
+  [OK]     test_User_RoleChange
+  [OK]     test_DirectConversation_Construction
+  [OK]     test_DirectConversation_SamePairIsOrderInsensitive
+  [OK]     test_Conversation_PolymorphicUse
+  [OK]     test_GroupConversation_Construction
+  [OK]     test_GroupConversation_RejectsEmptyTitle
+  [OK]     test_GroupConversation_AddParticipant
+  [OK]     test_GroupConversation_RejectsDuplicateParticipant
+  [OK]     test_GroupConversation_RemoveParticipant
+  [OK]     test_GroupConversation_RejectsRemovingUnknownParticipant
+  [OK]     test_Message_StartsBuffered
+  [OK]     test_Message_FullLifecycle
+  [OK]     test_Message_MarkAsSentSetsSentAt
+  [OK]     test_Message_FailedMarkAsSent_NoSentAt
+  [OK]     test_Message_UndeliveredFromSendingOrSent
+  [OK]     test_Message_EditContentOnlyIfDrafted
+  [OK]     test_Message_AddAndRemoveAttachment
+  [OK]     test_Message_RejectsDuplicateAttachment
+  [OK]     test_Message_RejectsRemovingUnknownAttachment
+  [OK]     test_Message_AttachmentsFrozenAfterBuffered
+  [OK]     test_Message_ContentOrAttachmentInvariant
+  [OK]     test_Message_CopyIsIndependent
+
+End of report.
