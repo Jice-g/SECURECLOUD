@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package messaging;
+
+service MessagingService {
+  rpc SendMessage (ChatMessageRequest) returns (ChatMessageResponse);
+}
+
+message ChatMessageRequest {
+  string sender = 1;
+  string recipient = 2;
+  string content = 3;
+}
+
+message ChatMessageResponse {
+  bool success = 1;
+  string message_id = 2;
+}
