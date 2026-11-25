@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "domain_test.h"
+#include "harness_test.h"
 
 using namespace domain;
 

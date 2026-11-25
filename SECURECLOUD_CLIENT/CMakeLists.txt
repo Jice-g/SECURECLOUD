@@ -45,7 +45,7 @@ target_include_directories(sc_domain PUBLIC src)
 enable_testing()
 
 add_executable(run_tests
-	tests/domain_test_1.cpp
+	tests/domain_tests/domain_test_1.cpp
 	tests/domain_test.h
 	)
 	

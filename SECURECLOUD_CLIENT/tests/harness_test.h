@@ -1,5 +1,5 @@
-#ifndef DOMAIN_TEST_H
-#define DOMAIN_TEST_H
+#ifndef HARNESS_TEST_H
+#define HARNESS_TEST_H
 
 #include <exception>
 #include <fstream>
@@ -133,4 +133,4 @@ static void writeReport(const std::string& filePath, const std::string& title)
     std::cout << "[REPORT] Written to: " << filePath << "\n";
 }
 
-#endif // DOMAIN_TEST_H
+#endif // HARNESS_TEST_H
