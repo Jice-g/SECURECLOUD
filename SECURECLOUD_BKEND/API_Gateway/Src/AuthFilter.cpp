@@ -3,7 +3,7 @@
 
 AuthFilter::AuthFilter() : Jwt("JWT") {
 
-	routeExempt = { "/TestAPI" };
+	routeExempt = { "/TestAPI", "/auth/login" };
 }
 
 void AuthFilter::setClient(std::shared_ptr<AuthClient> client) {

@@ -1,4 +1,4 @@
-#include "../RouteurTest/RouteurTest.h"
+#include "RouteurTest.h"
 
 void Router::registerRoutes(crow::App<AuthFilter>& app) {
 
@@ -31,7 +31,7 @@ void Router::registerRoutes(crow::App<AuthFilter>& app) {
 				connexion.send_text("Texte envoyer : " + text);
 			})
 		.onclose
-		([](crow::websocket::connection& connexion, const std::string& why, bool)
+		([](crow::websocket::connection& connexion, const std::string& why, auto&&...)
 			{
 				CROW_LOG_INFO << "Connexion ferme";
 			});

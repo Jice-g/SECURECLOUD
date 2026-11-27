@@ -1,0 +1,37 @@
+﻿{
+    "configurations": [
+        {
+            "name": "x64-Debug",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_PREFIX_PATH",
+                    "value": "C:/vcpkg/installed/x64-windows",
+                    "type": "PATH"
+                },
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.52.37025/bin/Hostx64/x64/cl.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.52.37025/bin/Hostx64/x64/cl.exe",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_EXE_LINKER_FLAGS",
+                    "value": "/LIBPATH:C:/PROGRA~2/MICROS~2/18/BUILDT~1/VC/Tools/MSVC/1452~1.370/lib/x64",
+                    "type": "STRING"
+                }
+            ]
+        }
+    ]
+}

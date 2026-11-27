@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include "MessageParser.h"
 #include "MessagingClient.h"
 
@@ -27,32 +28,32 @@ public:
                 })
             .onmessage([this](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
             if (is_binary) {
-                conn.send_text(R"({"status":"erreur","message":"Format pas encore supporte"})");
+                conn.send_text(R"({"status":"error","message":"Format pas encore supporte"})");
                 return;
             }
-            std::string response = handleText(data);
+            std::string response = handleIncomingText(data);
             conn.send_text(response);
                 });
     }
 
-    std::string handleText(const std::string& rawJson) {
+    std::string handleIncomingText(const std::string& rawJson) {
         ParsedMessage msg = parser_.parseMessage(rawJson);
 
         if (!msg.isValid) {
-            return R"({"status":"erreur","message":"JSON invalide"})";
+            return R"({"status":"error","message":"JSON invalide"})";
         }
 
         if (msg.action != "send_message") {
-            return R"({"status":"erreur","message":"Action inconnue"})";
+            return R"({"status":"error","message":"Action inconnue"})";
         }
 
         if (!messagingClient_) {
-            return R"({"status":"erreur","message":"MessagingClien pas initialiser"})";
+            return R"({"status":"error","message":"MessagingClien pas initialiser"})";
         }
 
         bool sent = messagingClient_->sendMessage(msg.sender, msg.recipient, msg.content);
         if (!sent) {
-            return R"({"status":"errer","message":"Echec de l'envoi"})";
+            return R"({"status":"error","message":"Echec de l'envoi"})";
         }
 
         return R"({"status":"ok","message":"Message envoye"})";
