@@ -1,8 +1,14 @@
-# CONTRAT CLIENT ↔ API GATEWAY : AUTHENTIFICATION (v0)
+# CONTRAT CLIENT ↔ API GATEWAY : AUTHENTIFICATION (v0.1)
 
-> SECURECLOUD[SKELETON] · proposé le lundi 2 novembre 2026 · **à l'équipe SECURECLOUD** pour *Gateway / auth-service*  
-> Périmètre : `POST /auth/login` (détaillé, E2E pour 6/11).
+> SECURECLOUD[SKELETON] · v0 proposée le 2 novembre 2026 · **v0.1 corrigée le 25 novembre 2026** · **à l'équipe SECURECLOUD** pour *Gateway / auth-service*  
+> Périmètre : `POST /auth/login` (détaillé, E2E).
 > `refresh` et `revoke` : réservés, esquissés au §10.
+
+**Changements v0 → v0.1** (aucun changement de comportement attendu côté Gateway, sauf précisions marquées ✱) :
+- §1 : l'exemple était en camelCase et sans `refresh_token` ; il est aligné sur le §4 (**`snake_case`**, référence unique).
+- ✱ §4 : seul le statut **`200`** est un succès ; tout autre `2xx` est refusé par le Client (`INVALID_RESPONSE`).
+- ✱ §5 : règle de **cohérence statut / `error.code`** (le Client est strict) ; cas des `5xx` sans corps JSON (proxy) ; `Retry-After` = **entier en secondes** uniquement.
+- §11 : Q7 clôse (snake_case).
 
 <br>
 
@@ -26,7 +32,20 @@ Client Qt ── HTTPS (TCP 443/8443, TLS) ──► API Gateway ── gRPC (r�
 - Le Client ne connaît **que** la Gateway. HTTP/JSON de bout en bout côté Client, gRPC derrière pour relayer aux micro-services.
 - `POST /auth/login` est une **route publique** : la Gateway ne valide aucun JWT dessus (l'utilisateur n'en a pas encore).
 - Le Client ne parse jamais le JWT : `access_token` et `refresh_token` sont des **chaînes opaques** pour lui.
+
+**Convention de nommage du JSON** : `snake_case` pour tous les champs (comme les jetons OAuth 2.0, RFC 6749 : `access_token`, `refresh_token`, `expires_in`, `token_type`) ; codes d'erreur en `MAJUSCULES_AVEC_TIRETS_BAS`. Le Client convertit vers ses propres conventions C++ à un seul endroit (le mapper).
+
 <br>
+
+```
+POST /auth/login          (HTTPS, via API_Gateway)
+→ {"login":"alice","password":"...","mfa_code":null}
+← 200 {"access_token":"...","refresh_token":"...","token_type":"Bearer","expires_in":900,
+       "user":{"id":"u-123","login":"alice","role":"STD_USER"}}
+← 401 {"error":{"code":"INVALID_CREDENTIALS"}}
+← 403 {"error":{"code":"ACCOUNT_DISABLED"}}   (seulement si le mot de passe était bon)
+← 5xx, ou pas de réponse → erreur réseau côté client
+```
 
 ---
 
@@ -53,7 +72,7 @@ Un satellite géostationnaire ajoute environ 600 ms d'aller-retour (RTT). Un log
 | Délai | Valeur proposée | Raison |
 |---|---|---|
 | Connexion (TCP + TLS) | **10 s** | Largement au-dessus des ~1,2 s attendus sur satellite |
-| Total de la requête | **20 s** | Marge pour une liaison dégradée ; au-delà, l'utilisateur doit savoir |
+| Total de la requête | **20 s** | Marge pour une liaison dégradée ; au-delà, l'utilisateur doit savoir. Le Client applique **un seul délai total de 20 s** (pas de délai de connexion séparé) |
 | `auth-service` côté Gateway | **5 s** | Au-delà → `503` |
 
 **Pas de nouvel essai automatique** après un délai dépassé : un login n'est pas idempotent (chaque tentative compte pour la limitation de débit, voir §7). C'est l'utilisateur qui relance.
@@ -84,7 +103,7 @@ Un satellite géostationnaire ajoute environ 600 ms d'aller-retour (RTT). Un log
 |---|---|---|---|
 | `login` | string | 3 à 32 caractères parmi `a-z 0-9 _ - .` | Déjà **normalisé** par le Client (`UserLogin` : début/fin nettoyés, minuscules). La Gateway/auth **doit** refaire sa propre validation et normalisation, sans faire confiance au Client |
 | `password` | string | 1 à 256 octets UTF-8 | **Jamais** modifié, ni nettoyé, ni normalisé (les espaces font partie du mot de passe) |
-| `mfa_code` | string ou `null` | 6 chiffres | **Réservé** : le Client envoie `null` ou omet le champ en v0 |
+| `mfa_code` | string ou `null` | 6 chiffres | **Réservé** : le Client envoie `null` en v0 |
 
 ```json
 { "login": "alice", "password": "Mot-de-passe-de-test", "mfa_code": null }
@@ -93,6 +112,8 @@ Un satellite géostationnaire ajoute environ 600 ms d'aller-retour (RTT). Un log
 ---
 
 ## 4. Réponse : succès
+
+✱ Seul **`200 OK`** est un succès. Tout autre `2xx` est traité par le Client comme `INVALID_RESPONSE`.
 
 | Élément | Valeur |
 |---|---|
@@ -110,7 +131,7 @@ Un satellite géostationnaire ajoute environ 600 ms d'aller-retour (RTT). Un log
 | `user.id` | string | Identifiant stable | Non vide (→ `UserId`) |
 | `user.login` | string | Login normalisé | Valide selon `UserLogin` |
 | `user.role` | string | `ADMIN`, `COORD` ou `STD_USER` | Valeur connue, sinon `INVALID_RESPONSE` (jamais de rôle par défaut) |
-| `user.created_at` | string | Optionnel, ISO 8601 UTC (`2026-10-01T08:00:00Z`) | Si absent : le Client utilise l'instant de connexion |
+| `user.created_at` | string | Optionnel, ISO 8601 UTC (`2026-10-01T08:00:00Z`) | Si absent : le Client utilise l'instant de connexion. Présent mais illisible : `INVALID_RESPONSE` |
 
 ```json
 {
@@ -144,6 +165,11 @@ Corps commun : `{ "error": { "code": "…", "message": "…" } }`. Le `message` 
 | 502 / 503 / 504 | `SERVICE_UNAVAILABLE` | `auth-service` injoignable ou trop lent | `SERVICE_UNAVAILABLE` | `Retry-After` (SHOULD) |
 | 3xx | — | Redirection | `INVALID_RESPONSE` (refus de suivre) | |
 | Autre | — | Statut inattendu, ou corps non JSON | `INVALID_RESPONSE` | |
+
+✱ **Règles de lecture côté Client (strictes) :**
+- **Cohérence** : un statut n'est accepté qu'avec un `error.code` prévu pour lui dans le tableau ci-dessus (ex. `401` + `ACCOUNT_DISABLED`, ou `403` + `INVALID_CREDENTIALS`, donnent `INVALID_RESPONSE`).
+- **Exception `500`, `502`, `503`, `504`** : le statut seul suffit (`SERVICE_UNAVAILABLE`), même si le corps n'est pas du JSON (page d'erreur d'un proxy). Les autres `5xx` (501, 505…) donnent `INVALID_RESPONSE`.
+- **`Retry-After`** : seule la forme **entier de secondes** est lue (pas la date HTTP). Absent ou illisible : le Client considère 0 (« inconnu »).
 
 Règles de sécurité sur les erreurs :
 - **MUST** : `401 INVALID_CREDENTIALS` identique, au caractère près, que l'identifiant existe ou non (pas d'énumération de comptes).
@@ -220,7 +246,7 @@ Ce faux serveur de test côté Client (`tests/tools/`) implémentera **ce même 
 
 ---
 
-## 10. Réservé : hors E2E du 6/11
+## 10. Réservé : hors E2E
 
 | Endpoint | Usage | Esquisse (à confirmer) |
 |---|---|---|
@@ -240,7 +266,7 @@ Ce faux serveur de test côté Client (`tests/tools/`) implémentera **ce même 
 | Q4 | Politique anti-force-brute ? | 5 échecs / 5 min par login ⇒ `429` + `Retry-After` |
 | Q5 | Quelle autorité de certification en dev, et où le Client récupère-t-il son certificat racine ? | CA maison `dev-ca.pem` fournie dans le dépôt de la Gateway, **sans sa clé privée** |
 | Q6 | La Gateway renvoie-t-elle `X-Request-Id` ? | Oui |
-| Q7 | Noms de champs en `snake_case` acceptés ? | Oui |
+| Q7 | Noms de champs en `snake_case` | Oui |
 | Q8 | HTTP/1.1 suffisant côté Gateway (HTTP/2 non requis) ? | Oui |
 | Q9 | `GET /health` disponible sur la Gateway ? | Oui |
 | Q10 | Préfixe de version (`/v1/auth/login`) ou chemins de la spécification inchangés ? | Chemins inchangés en SKELETON |

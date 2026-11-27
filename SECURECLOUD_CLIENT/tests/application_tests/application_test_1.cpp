@@ -1,16 +1,21 @@
 // Application layer tests: AuthSession, AuthResult, AuthError, LoginUseCase (with FakeSessionGateway).
-// No network, no Qt. SessionManager has its own file (it also runs under the thread sanitizer).
+// No network, no event loop: the fakes answer synchronously (or by hand), so every signal is received
+// before execute() returns. SessionManager has its own file (it also runs under the thread sanitizer).
 
 #include <chrono>
 #include <optional>
 #include <string>
 
+#include <vector>
+
+#include <QObject>
+
 #include "harness_test.h"
-#include "application/AuthError.h"
-#include "application/AuthResult.h"
-#include "application/AuthSession.h"
-#include "application/LoginUseCase.h"
-#include "application/SessionManager.h"
+#include "application/loginusecase/AuthError.h"
+#include "application/loginusecase/AuthResult.h"
+#include "application/loginusecase/AuthSession.h"
+#include "application/loginusecase/LoginUseCase.h"
+#include "application/loginusecase/SessionManager.h"
 #include "application_tests/fakes/FakeSessionGateway.h"
 
 using namespace application;
@@ -57,6 +62,24 @@ static const AuthError ALL_ERRORS[] = {
     AuthError::INVALID_INPUT, AuthError::INVALID_CREDENTIALS, AuthError::ACCOUNT_DISABLED,
     AuthError::RATE_LIMITED, AuthError::SERVER_UNREACHABLE, AuthError::SERVICE_UNAVAILABLE,
     AuthError::INVALID_RESPONSE};
+
+// =============================================================================
+// Helper: LoginUseCase is asynchronous. runLogin() connects to finished(), calls execute(),
+// and returns the ONE outcome that was emitted (the fakes answer before execute() returns).
+// =============================================================================
+
+static LoginOutcome runLogin(LoginUseCase& useCase, const std::string& login, const std::string& password)
+{
+    std::vector<LoginOutcome> received;
+    const QMetaObject::Connection link = QObject::connect(
+        &useCase, &LoginUseCase::finished, [&received](const LoginOutcome& loc) { received.push_back(loc); });
+
+    useCase.execute(login, password);
+    QObject::disconnect(link);
+
+    CHECK(received.size() == 1);  // exactly one finished() per accepted execute()
+    return received.empty() ? LoginOutcome::failure(AuthError::INVALID_RESPONSE) : received.front();
+}
 
 // =============================================================================
 // AuthError / AuthSession / AuthResult
@@ -123,7 +146,7 @@ static void test_Login_SuccessOpensSessionAndReturnsLoginAndRole()
     LoginUseCase useCase(gateway, sessions);
     gateway.willReturn(successFor("alice", domain::UserRole::COORD, "secret-token"));
 
-    const LoginOutcome out = useCase.execute("alice", "pw");
+    const LoginOutcome out = runLogin(useCase, "alice", "pw");
 
     CHECK(out.ok());
     CHECK(!out.error.has_value());
@@ -143,7 +166,7 @@ static void test_Login_NormalizesLoginBeforeCallingThePort()
     LoginUseCase useCase(gateway, sessions);
     gateway.willReturn(successFor("alice"));
 
-    const LoginOutcome out = useCase.execute("  ALICE ", "pw");
+    const LoginOutcome out = runLogin(useCase, "  ALICE ", "pw");
 
     CHECK(out.ok());
     CHECK(gateway.lastLogin() == "alice");
@@ -158,7 +181,7 @@ static void test_Login_PasswordIsSentUnmodified()
     gateway.willReturn(successFor("alice"));
 
     const std::string password = "  pass word  ";  // leading, trailing and inner spaces
-    (void)useCase.execute("alice", password);
+    (void)runLogin(useCase, "alice", password);
 
     CHECK(gateway.lastPassword() == password);
 }
@@ -170,9 +193,9 @@ static void test_Login_SecondSuccessReplacesTheSession()
     LoginUseCase useCase(gateway, sessions);
 
     gateway.willReturn(successFor("alice", domain::UserRole::STD_USER, "t1"));
-    CHECK(useCase.execute("alice", "pw").ok());
+    CHECK(runLogin(useCase, "alice", "pw").ok());
     gateway.willReturn(successFor("bob", domain::UserRole::ADMIN, "t2"));
-    CHECK(useCase.execute("bob", "pw").ok());
+    CHECK(runLogin(useCase, "bob", "pw").ok());
 
     CHECK(sessions.currentUser()->login().value() == "bob");
     CHECK(sessions.accessToken().value() == "t2");
@@ -188,7 +211,7 @@ static void checkInvalidInput(const std::string& rawLogin, const std::string& pa
     SessionManager sessions;
     LoginUseCase useCase(gateway, sessions);
 
-    const LoginOutcome out = useCase.execute(rawLogin, password);
+    const LoginOutcome out = runLogin(useCase, rawLogin, password);
 
     CHECK(!out.ok());
     CHECK(out.error.has_value() && *out.error == AuthError::INVALID_INPUT);
@@ -219,7 +242,7 @@ static void test_Login_PasswordLimitIsCountedInBytes()
         FakeSessionGateway gateway;
         SessionManager sessions;
         LoginUseCase useCase(gateway, sessions);
-        (void)useCase.execute("alice", customStringLength('x', 256));
+        (void)runLogin(useCase, "alice", customStringLength('x', 256));
         CHECK(gateway.callCount() == 1);
     }
     // 128 x "e acute" = 128 characters but 256 bytes: accepted.
@@ -230,7 +253,7 @@ static void test_Login_PasswordLimitIsCountedInBytes()
         FakeSessionGateway gateway;
         SessionManager sessions;
         LoginUseCase useCase(gateway, sessions);
-        (void)useCase.execute("alice", pw);
+        (void)runLogin(useCase, "alice", pw);
         CHECK(gateway.callCount() == 1);
     }
     // 129 x "e acute" = 129 characters but 258 bytes: rejected.
@@ -254,7 +277,7 @@ static void test_Login_EveryPortErrorIsPropagatedWithoutSession()
         LoginUseCase useCase(gateway, sessions);
         gateway.willReturn(AuthResult::failure(error));
 
-        const LoginOutcome out = useCase.execute("alice", "pw");
+        const LoginOutcome out = runLogin(useCase, "alice", "pw");
 
         CHECK(!out.ok());
         CHECK(out.error.has_value() && *out.error == error);
@@ -272,7 +295,7 @@ static void test_Login_RateLimitedKeepsItsDelay()
     LoginUseCase useCase(gateway, sessions);
     gateway.willReturn(AuthResult::failure(AuthError::RATE_LIMITED, 30));
 
-    const LoginOutcome out = useCase.execute("alice", "pw");
+    const LoginOutcome out = runLogin(useCase, "alice", "pw");
 
     CHECK(*out.error == AuthError::RATE_LIMITED);
     CHECK(out.retryAfterSeconds == 30);
@@ -285,26 +308,127 @@ static void test_Login_FailureDoesNotCloseAnOpenSession()
     LoginUseCase useCase(gateway, sessions);
 
     gateway.willReturn(successFor("alice", domain::UserRole::STD_USER, "t1"));
-    CHECK(useCase.execute("alice", "pw").ok());
+    CHECK(runLogin(useCase, "alice", "pw").ok());
 
     gateway.willReturn(AuthResult::failure(AuthError::INVALID_CREDENTIALS));
-    CHECK(!useCase.execute("alice", "wrong").ok());
-    CHECK(!useCase.execute("", "pw").ok());  // local validation failure too
+    CHECK(!runLogin(useCase, "alice", "wrong").ok());
+    CHECK(!runLogin(useCase, "", "pw").ok());  // local validation failure too
 
     CHECK(sessions.isAuthenticated());
     CHECK(sessions.accessToken().value() == "t1");
     CHECK(sessions.currentUser()->login().value() == "alice");
 }
 
-static void test_Login_TechnicalFailureOfThePortPropagatesAndLeavesSessionUntouched()
+static void test_Login_TechnicalFailureOfThePortBecomesInvalidResponseAndFreesTheUseCase()
 {
     FakeSessionGateway gateway;
     SessionManager sessions;
     LoginUseCase useCase(gateway, sessions);
     gateway.willThrow();
 
-    CHECK_THROWS(useCase.execute("alice", "pw"), std::runtime_error);
+    const LoginOutcome out = runLogin(useCase, "alice", "pw");  // no exception escapes any more
+
+    CHECK(!out.ok());
+    CHECK(out.error.has_value() && *out.error == AuthError::INVALID_RESPONSE);
+    CHECK(gateway.callCount() == 1);
+    CHECK(!useCase.isBusy());
     CHECK(!sessions.isAuthenticated());
+}
+
+// =============================================================================
+// LoginUseCase: asynchronous behaviour (isBusy, second execute ignored, stray answers)
+// =============================================================================
+
+static void test_Login_IsBusyBeforeDuringAndAfter()
+{
+    DeferredSessionGateway gateway;
+    SessionManager sessions;
+    LoginUseCase useCase(gateway, sessions);
+    std::vector<LoginOutcome> received;
+    QObject::connect(&useCase, &LoginUseCase::finished, [&received](const LoginOutcome& o) { received.push_back(o); });
+
+    CHECK(!useCase.isBusy());                       // before
+    useCase.execute("alice", "pw");
+    CHECK(useCase.isBusy());                        // during: the gateway has not answered yet
+    CHECK(received.empty());
+    CHECK(gateway.callCount() == 1);
+
+    gateway.deliver(AuthResult::success(makeSession("alice")));
+
+    CHECK(!useCase.isBusy());                       // after
+    CHECK(received.size() == 1);
+    CHECK(received[0].ok());
+    CHECK(sessions.isAuthenticated());
+}
+
+static void test_Login_SecondExecuteWhileRunningIsIgnored()
+{
+    DeferredSessionGateway gateway;
+    SessionManager sessions;
+    LoginUseCase useCase(gateway, sessions);
+    std::vector<LoginOutcome> received;
+    QObject::connect(&useCase, &LoginUseCase::finished, [&received](const LoginOutcome& o) { received.push_back(o); });
+
+    useCase.execute("alice", "pw");
+    useCase.execute("bob", "pw");          // ignored: no call to the port, no finished()
+    useCase.execute("", "pw");             // ignored too, even if it would be INVALID_INPUT
+
+    CHECK(gateway.callCount() == 1);
+    CHECK(gateway.lastLogin() == "alice");
+    CHECK(received.empty());
+
+    gateway.deliver(AuthResult::success(makeSession("alice")));
+
+    CHECK(received.size() == 1);           // one answer for one accepted execute()
+    CHECK(received[0].user->login == "alice");
+    CHECK(!useCase.isBusy());
+
+    // and the use case is usable again
+    useCase.execute("bob", "pw");
+    CHECK(gateway.callCount() == 2);
+    CHECK(useCase.isBusy());
+}
+
+static void test_Login_AnswerWithoutRunningLoginIsIgnored()
+{
+    DeferredSessionGateway gateway;
+    SessionManager sessions;
+    LoginUseCase useCase(gateway, sessions);
+    std::vector<LoginOutcome> received;
+    QObject::connect(&useCase, &LoginUseCase::finished, [&received](const LoginOutcome& o) { received.push_back(o); });
+
+    gateway.deliver(AuthResult::success(makeSession("alice")));  // nobody asked
+
+    CHECK(received.empty());
+    CHECK(!sessions.isAuthenticated());
+    CHECK(!useCase.isBusy());
+}
+
+static void test_Login_InvalidInputDoesNotMakeTheUseCaseBusy()
+{
+    FakeSessionGateway gateway;
+    SessionManager sessions;
+    LoginUseCase useCase(gateway, sessions);
+
+    (void)runLogin(useCase, "", "pw");
+    CHECK(!useCase.isBusy());
+    (void)runLogin(useCase, "alice", "");
+    CHECK(!useCase.isBusy());
+    CHECK(gateway.callCount() == 0);
+}
+
+static void test_Login_SuccessOutcomeNeverCarriesAToken()
+{
+    FakeSessionGateway gateway;
+    SessionManager sessions;
+    LoginUseCase useCase(gateway, sessions);
+    gateway.willReturn(successFor("alice", domain::UserRole::STD_USER, "secret-token-xyz"));
+
+    const LoginOutcome out = runLogin(useCase, "alice", "pw");
+
+    CHECK(out.ok());
+    CHECK(out.user->login == "alice");     // LoginResultDTO has only login + role: no field can hold a token
+    CHECK(sessions.accessToken().value() == "secret-token-xyz");  // the token stays in the Application
 }
 
 // =============================================================================
@@ -330,7 +454,13 @@ int main(int argc, char* argv[])
     RUN_TEST(test_Login_EveryPortErrorIsPropagatedWithoutSession);
     RUN_TEST(test_Login_RateLimitedKeepsItsDelay);
     RUN_TEST(test_Login_FailureDoesNotCloseAnOpenSession);
-    RUN_TEST(test_Login_TechnicalFailureOfThePortPropagatesAndLeavesSessionUntouched);
+    RUN_TEST(test_Login_TechnicalFailureOfThePortBecomesInvalidResponseAndFreesTheUseCase);
+
+    RUN_TEST(test_Login_IsBusyBeforeDuringAndAfter);
+    RUN_TEST(test_Login_SecondExecuteWhileRunningIsIgnored);
+    RUN_TEST(test_Login_AnswerWithoutRunningLoginIsIgnored);
+    RUN_TEST(test_Login_InvalidInputDoesNotMakeTheUseCaseBusy);
+    RUN_TEST(test_Login_SuccessOutcomeNeverCarriesAToken);
 
 
     std::cout << "\n==================================================================\n"

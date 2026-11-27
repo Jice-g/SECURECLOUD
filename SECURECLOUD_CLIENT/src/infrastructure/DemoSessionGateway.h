@@ -1,15 +1,16 @@
-﻿/**
+/**
  * @file DemoSessionGateway.h
  * @brief DEMO ONLY - scripted ISessionGateway so the UI can be run and tried
- *        without any server (the real HttpsSessionGateway is built in another thread).
+ *        without any server (the real adapter is HttpsSessionGateway).
  *
  * It does NO network, NO cryptography, checks NO real password. It exists to
  * exercise every screen state of UC1 by typing a magic username.
  * It is compiled only when the CMake option SC_DEMO_GATEWAY is ON, and it
  * must never be part of a release build.
  *
- * No Qt here: it is plain C++20 like the Application layer it plugs into.
- * login() runs in the worker thread, so sleeping is harmless for the UI.
+ * ASYNCHRONOUS like the real adapter (ADR UC1-16): login() computes the result at once, then
+ * emits loginFinished() after LATENCY_MS through a single-shot QTimer. No sleep: it would freeze
+ * the UI, since everything runs in the UI thread. No Q_OBJECT needed (it adds no signal or slot).
  *
  * ADAPT-ME (the only guesses of this file): the constructors of domain::UserId and
  * domain::User, and TimeStamp::now(), are used as described in UC1_UML.md.
@@ -18,10 +19,10 @@
 #ifndef SC_INFRASTRUCTURE_DEMOSESSIONGATEWAY_H
 #define SC_INFRASTRUCTURE_DEMOSESSIONGATEWAY_H
 
-#include <chrono>
 #include <string>
-#include <thread>
 #include <utility>
+
+#include <QTimer>
 
 #include "application/loginusecase/AuthError.h"
 #include "application/loginusecase/AuthResult.h"
@@ -59,13 +60,19 @@ public:
     static constexpr int LATENCY_MS = 700;           // makes the busy state visible
     static constexpr int RATE_LIMIT_SECONDS = 10;
 
-    [[nodiscard]]
-    application::AuthResult login(const application::LoginRequestDTO& request) override
+    void login(const application::LoginRequestDTO& request) override
+    {
+        const application::AuthResult result = compute(request);
+        // The answer arrives later, as a real network would do. `this` is the context object:
+        // if the gateway is destroyed before the delay, the lambda is NOT called.
+        QTimer::singleShot(LATENCY_MS, this, [this, result]() { emit loginFinished(result); });
+    }
+
+private:
+    static application::AuthResult compute(const application::LoginRequestDTO& request)
     {
         using application::AuthError;
         using application::AuthResult;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(LATENCY_MS));
 
         const std::string name = request.login.value();
 
@@ -88,7 +95,6 @@ public:
         return AuthResult::success(makeSession(request, role));
     }
 
-private:
     static application::AuthSession makeSession(const application::LoginRequestDTO& request,
                                                 domain::UserRole role)
     {
