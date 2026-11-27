@@ -1,5 +1,5 @@
-#ifndef DOMAIN_TEST_H
-#define DOMAIN_TEST_H
+#ifndef HARNESS_TEST_H
+#define HARNESS_TEST_H
 
 #include <exception>
 #include <fstream>
@@ -7,7 +7,17 @@
 #include <string>
 #include <vector>
 
-
+#include "domain/model/Enums.h"
+#include "domain/model/UserId.h"
+#include "domain/model/MessageId.h"
+#include "domain/model/ConversationId.h"
+#include "domain/model/AttachmentId.h"
+#include "domain/model/UserLogin.h"
+#include "domain/model/MessageContent.h"
+#include "domain/model/TimeStamp.h"
+#include "domain/model/User.h"
+#include "domain/model/Conversation.h"
+#include "domain/model/Message.h"
 
 // =============================================================================
 // Minimal test harness (no dependency).
@@ -99,6 +109,7 @@ static int g_totalChecks = 0;
 
 
 
+
 /// Writes the report (passed AND failed tests). Path comes from the caller.
 ///
 static void writeReport(const std::string& filePath, const std::string& title)
@@ -122,4 +133,4 @@ static void writeReport(const std::string& filePath, const std::string& title)
     std::cout << "[REPORT] Written to: " << filePath << "\n";
 }
 
-#endif // DOMAIN_TEST_H
+#endif // HARNESS_TEST_H

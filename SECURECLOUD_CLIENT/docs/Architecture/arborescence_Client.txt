@@ -22,37 +22,37 @@ SecureCloud-Client/
 ├── assets/                     # Icons, Images, QSS...
 │
 ├── tests/                      # Test files
-│   ├── domain_tests/
+│   ├── harness_test.h               # Home-made harness (CHECK, CHECK_THROWS, RUN_TEST)
+│   ├── domain_test/          
+│   │     └── domain_test_1.cpp   # Domain tests (IDs, User, Message, Conversation...)
 │   ├── application_tests/
+│   ├── infrastructure_tests/
 │   ├── integration_tests/
 │   └── spikes/                 # experimental code
 │
 └── src/
-    ├── main.cpp                # Entry point (setup)
-    │
     ├── domain/
     │   ├── model/                  # ← Entities + Value Objects
     │   │   ├── Enums.h
     │   │   ├── TimeStamp.h
     │   │   ├── UserId.h
-    │   │   ├── UserLogin.h
-    │   │   ├── UserLogin.cpp
+    │   │   ├── UserLogin.h / .cpp
     │   │   ├── MessageContent.h
-    │   │   ├── User.h / .cpp
+    │   │   ├── User.h
     │   │   ├── Message.h / .cpp
-    │   │   ├── Conversation.h / .cpp
-    │   │   ├── Attachment.h / .cpp
-    │   │   └── Alert.h / .cpp
+    │   │   ├── MessageId.h
+    │   │   ├── Conversation.h
+    │   │   ├── ConversationId.h
+    │   │   └── AttachmentId.h
     │   │
-    │   ├── repositories/           # ← Interfaces
+    │   ├── repository/             # ← Interfaces
     │   │   ├── IUserRepository.h
     │   │   ├── IMessageRepository.h
-    │   │   └── IConversationRepository.h
+    │   │   ├── IConversationRepository.h
+    │   │   └── RepositoryError.h
     │   │
-    │   └── services/               # ← Behavior
-    │       ├── LogSessionService.h / .cpp
-    │       ├── MessagingService.h / .cpp
-    │       └── AlertService.h / .cpp
+    │   └── services/               # ← Pure rules, no I/O
+    │       └── 
     │
     ├── application/            
     │   ├── SendMessageUseCase.h/.cpp

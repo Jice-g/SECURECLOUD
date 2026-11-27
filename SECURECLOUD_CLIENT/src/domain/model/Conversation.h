@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <vector>
@@ -59,8 +59,8 @@ public:
     virtual ~Conversation() = default;
 
     // Prevent copying to avoid object (as Conversation) slicing (good practice for entities)
-    Conversation(const Conversation&) = default;
-    Conversation& operator=(const Conversation&) = default;
+    Conversation(const Conversation&) = delete;
+    Conversation& operator=(const Conversation&) = delete;
 
     /// @brief Returns the unique identifier of the conversation.
     const ConversationId& id() const noexcept
@@ -77,7 +77,7 @@ public:
     /// @brief Pure virtual method: checks if a specific user is in this conversation.
     /// @param userId The user to check.
     /// @return true if the user is a participant.
-    virtual bool IsParticipating(const UserId& userId) const noexcept = 0;
+    virtual bool isParticipating(const UserId& userId) const noexcept = 0;
 };
 
 
@@ -106,14 +106,14 @@ public:
     ///
     DirectConversation(const ConversationId& id, const UserId& p1, const UserId& p2, const TimeStamp& createdAt)
         : Conversation(id, createdAt), m_participant1(p1), m_participant2(p2)
-        { }
+    { }
 
     /// @brief Returns the type (DIRECT).
     ConversationType type() const noexcept override
-        { return ConversationType::DIRECT; }
+    { return ConversationType::DIRECT; }
 
     /// @brief Checks if a user is one of the two participants.
-    bool IsParticipating(const UserId& userId) const noexcept override {
+    bool isParticipating(const UserId& userId) const noexcept override {
         return m_participant1 == userId || m_participant2 == userId;
     }
 
@@ -128,22 +128,12 @@ public:
     /// @brief There cannot be 2 different direct conversations with the same two participants.
     /// A conversation is UserId_1 + UserId_2 conversing with each other.
     ///
-    bool operator==(const DirectConversation& other) const noexcept
+    bool checkParticipants(const UserId& user1, const UserId& user2) const noexcept
     {
-        return    (m_participant1 == other.participant1() && m_participant2 == other.participant2())
-               ||  (m_participant1 == other.participant2() && m_participant2 == other.participant1()) ;
-
+       return
+        ( this->participant1() == user1  &&  this->participant2() == user2 )
+        || ( this->participant1() == user2  &&  this->participant2() == user1 );
     }
-
-    bool operator!=(const DirectConversation& other) const noexcept
-    {
-        return !(   m_participant1 == other.participant1() && m_participant2 == other.participant2()
-                ||  m_participant1 == other.participant2() && m_participant2 == other.participant1()
-                 );
-    }
-
-    // Ajouter un merge(DirectConversation& conv1, DirectConversation& conv2)
-    // Ajoute les messages de conv2 dans conv1 trié chronologiquement et détruit conv2
 
 };
 
@@ -184,7 +174,7 @@ public:
     ConversationType type() const noexcept override { return ConversationType::GROUP; }
 
     /// @brief Checks if a user is in the group.
-    bool IsParticipating(const UserId& userId) const noexcept override {
+    bool isParticipating(const UserId& userId) const noexcept override {
         return std::find(m_participants.begin(), m_participants.end(), userId) != m_participants.end();
     }
 
@@ -198,7 +188,7 @@ public:
     /// @param userId The user to add.
     /// @throws std::invalid_argument if the user is already in the group.
     void addParticipant(const UserId& userId) {
-        if (IsParticipating(userId)) {
+        if (isParticipating(userId)) {
             throw std::invalid_argument("User is already a participant in this group");
         }
         m_participants.push_back(userId);
