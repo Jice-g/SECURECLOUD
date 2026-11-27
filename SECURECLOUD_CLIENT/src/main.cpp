@@ -8,7 +8,7 @@ namespace dom=domain;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ClientChatWindow w;
+    ui::ClientChatWindow w;
     w.show();
 
     return QApplication::exec();
