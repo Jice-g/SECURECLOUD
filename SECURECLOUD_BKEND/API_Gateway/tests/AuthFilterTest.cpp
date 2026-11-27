@@ -10,7 +10,7 @@ TEST(AuthFilterTest, RouteExempt) {
     EXPECT_EQ(res.code, 200);
 }
 
-TEST(AuthFilterTest, RouteExemptBis) {
+TEST(AuthFilterTest, RouteExempt2) {
     AuthFilter filter;
     auto req = makeRequest("/Auth/login");
     crow::response res;

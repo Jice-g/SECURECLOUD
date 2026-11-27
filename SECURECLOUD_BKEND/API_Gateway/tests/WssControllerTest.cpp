@@ -47,7 +47,7 @@ protected:
     std::unique_ptr<WssController> controller_;
 };
 
-TEST_F(WssControllerTest, FluxCompletValide) {
+TEST_F(WssControllerTest, CompletValide) {
     std::string jsonInput = R"({
         "action": "send_message",
         "sender": "alice",
@@ -65,7 +65,7 @@ TEST_F(WssControllerTest, FluxCompletValide) {
     EXPECT_EQ(fakeService_.receivedContent, "Bonjour depuis le WebSocket !");
 }
 
-TEST_F(WssControllerTest, RejetteJsonIncompletSansAppelerGrpc) {
+TEST_F(WssControllerTest, JsonIncompletS) {
     std::string badJson = R"({"action": "send_message", "sender": "alice"})";
 
     std::string rawReply = controller_->handleIncomingText(badJson);
@@ -76,7 +76,7 @@ TEST_F(WssControllerTest, RejetteJsonIncompletSansAppelerGrpc) {
     EXPECT_TRUE(fakeService_.receivedSender.empty());
 }
 
-TEST_F(WssControllerTest, RejetteActionInconnue) {
+TEST_F(WssControllerTest, ActionInconnue) {
     std::string unknownAction = R"({
         "action": "delete_all",
         "sender": "alice",
@@ -92,7 +92,7 @@ TEST_F(WssControllerTest, RejetteActionInconnue) {
     EXPECT_EQ(std::string(reply["message"].s()), "Action inconnue");
 }
 
-TEST_F(WssControllerTest, GereErreurMicroserviceGrpc) {
+TEST_F(WssControllerTest, ErreurMicroservice) {
     fakeService_.simulateFailure = true;
 
     std::string jsonInput = R"({

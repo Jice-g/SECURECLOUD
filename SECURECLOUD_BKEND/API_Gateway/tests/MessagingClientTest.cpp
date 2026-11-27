@@ -55,14 +55,14 @@ TEST_F(MessagingClientTest, EnvoiMessageValide) {
     EXPECT_EQ(fakeService_.lastContent, "Salut Bob !");
 }
 
-TEST_F(MessagingClientTest, RejetteChampsVidesSansAppelerGrpc) {
+TEST_F(MessagingClientTest, ChampsVides) {
     EXPECT_FALSE(client_->sendMessage("", "bob", "Salut"));
     EXPECT_FALSE(client_->sendMessage("alice", "", "Salut"));
     EXPECT_FALSE(client_->sendMessage("alice", "bob", ""));
     EXPECT_TRUE(fakeService_.lastSender.empty());
 }
 
-TEST_F(MessagingClientTest, GerePanneServeurGrpc) {
+TEST_F(MessagingClientTest, PanneGrpc) {
     fakeService_.simulateFailure = true;
     bool ok = client_->sendMessage("alice", "bob", "Salut");
 

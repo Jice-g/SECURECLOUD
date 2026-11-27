@@ -10,15 +10,16 @@
 
 ## Dépendances
 
-CMake, un compilateur C++17, ainsi que Crow, gRPC et Protobuf déjà installés.
+CMake,  Crow, gRPC et Protobuf.
 
-## Compilation sans installation automatique
+## MOC auth pour la demo
 
-Indiquer à CMake le préfixe où les fichiers `*Config.cmake` des dépendances sont déjà installés. Utiliser un nouveau dossier de build et le même toolset MSVC que celui utilisé pour compiler ces bibliothèques :
+`AuthServiceMock` est le serveur gRPC de démo. Il écoute  sur `127.0.0.1:50051` et accepte les comptes  `alice`, `coord` ou `admin`, avec le mot de passe `azerty`.
 
-```powershell
-cmake -S . -B build-no-vcpkg -DCMAKE_PREFIX_PATH="C:\chemin\vers\dependances" -DCMAKE_BUILD_TYPE=Release
-cmake --build build-no-vcpkg
-```
+## HTTPS local avec Caddy
 
-L'exécutable est dans le dossier `build-no-vcpkg`. Les DLL présentes dans le préfixe indiqué sont copiées à côté de l'exécutable pour permettre son lancement.
+Pour un test sur le même ordinateur, Caddy termine TLS sur `localhost:8443` et transmet les requêtes à Crow sur `127.0.0.1:8085`.
+
+Le certificat est signé par l'autorité locale de Caddy. Dans le terminal utilisé pour lancer le client.
+
+Ce certificat est destiné au test local sur `localhost` uniquement. Pour un autre ordinateur, il faut un nom d'hôte accessible depuis le client et un certificat qui couvre ce nom.

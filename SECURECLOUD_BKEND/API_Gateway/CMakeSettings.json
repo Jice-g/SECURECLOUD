@@ -13,7 +13,7 @@
             "variables": [
                 {
                     "name": "CMAKE_PREFIX_PATH",
-                    "value": "C:/vcpkg/installed/x64-windows",
+                    "value": "C:/vcpkg/installed/x64-windows-bt18;C:/vcpkg/installed/x64-windows",
                     "type": "PATH"
                 },
                 {

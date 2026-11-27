@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "MessageParser.h"
 
-TEST(MessageParserTest, ParseActionValide) {
+TEST(MessageParserTest, ParseAction) {
     MessageParser parser;
     std::string json = R"({"action":"send_message","content":"Bonjour"})";
 
@@ -11,7 +11,7 @@ TEST(MessageParserTest, ParseActionValide) {
     EXPECT_EQ(parser.getLastAction(), "send_message");
 }
 
-TEST(MessageParserTest, ParseActionJsonInvalide) {
+TEST(MessageParserTest, JsonInvalide) {
 
     MessageParser parser;
     std::string action = parser.parseAction("{json_mal_forme");
@@ -19,14 +19,14 @@ TEST(MessageParserTest, ParseActionJsonInvalide) {
     EXPECT_TRUE(parser.getLastAction().empty());
 }
 
-TEST(MessageParserTest, ParseActionChampManquantOuMauvaisType) {
+TEST(MessageParserTest, ActionChampQuiManque) {
     MessageParser parser;
 
     EXPECT_TRUE(parser.parseAction(R"({"sender":"user1"})").empty());
     EXPECT_TRUE(parser.parseAction(R"({"action":12345})").empty());
 }
 
-TEST(MessageParserTest, ParseMessageCompletValide) {
+TEST(MessageParserTest, ParseMessageValide) {
     MessageParser parser;
     std::string json = R"({
         "action": "send_message",
@@ -45,7 +45,7 @@ TEST(MessageParserTest, ParseMessageCompletValide) {
     EXPECT_EQ(parser.getLastAction(), "send_message");
 }
 
-TEST(MessageParserTest, ParseMessageChampObligatoireManquant) {
+TEST(MessageParserTest, ParseMessageChampManquant) {
     MessageParser parser;
     // Il manque recipient
     std::string json = R"({
