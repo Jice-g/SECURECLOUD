@@ -1,7 +1,9 @@
-﻿#pragma once
+#pragma once
 
 #include <cstddef>
 #include <string>
+
+#include <QObject>
 
 #include "application/gateway/ISessionGateway.h"
 #include "application/loginusecase/LoginOutcome.h"
@@ -13,40 +15,53 @@
 namespace application {
 
 /// @brief Use case #1 (UC-01) : "log in". It validates the input, asks the port, opens the session.
-/// @details Synchronous. The UI runs it in a worker thread (LoginController).
+/// @details ASYNCHRONOUS (ADR UC1-16): execute() returns at once, the outcome arrives through the signal finished().
+///          Everything runs in the UI thread (no worker thread, no mutex needed here).
 ///          It knows the PORT only (ISessionGateway), never the HTTPS adapter:
-///          that makes it testable with a fake (the DemoSessionGateway), without network and without Qt.
-///          It holds references: the gateway and the session manager must exist independantly.
+///          that makes it testable with a fake, without network.
+///          It holds references: the gateway and the session manager must outlive it.
 ///
-class LoginUseCase final {
+class LoginUseCase final : public QObject {
+    Q_OBJECT
 
 public:
     /// Maximum password size, in BYTES of UTF-8 (the contract with the Gateway counts bytes, not characters).
-    /// The reason is some special caracters that may be coded on 2 bytes
+    /// The reason is some special characters that may be coded on 2 bytes.
     ///
     static constexpr std::size_t MAX_PASSWORD_BYTES = 256;
 
-    /// @param gateway  the port used to authenticate (& : not owned).
-    /// @param session where the session is stored on success. (& : not owned).
-    /// @details The real gateway is defined and reached in the infrastruture layer.
+    /// @param gateway  the port used to authenticate (& : not owned), instanciated in the main.
+    /// @param session  where the session is stored on success (& : not owned), instanciated in the main.
+    /// @param parent   optional Qt parent.
+    /// @details The constructor connects gateway.loginFinished() to onGatewayFinished().
     ///
-    LoginUseCase(ISessionGateway& gateway, SessionManager& session);
+    LoginUseCase(ISessionGateway& gateway, SessionManager& session, QObject* parent = nullptr);
 
-    /// @brief Runs the login scenario. Waits for the result.
-    /// @param strLogin login as it is typed by the client current user. Spaces and case are normalized by UserLogin(domain).
-    /// @param password as it was typed [1..MAX_PASSWORD_BYTES] bytes.
-    /// @return a LoginOutcome: a user or an error. user : login + role (never a token).
-    ///         INVALID_INPUT is returned before any call to the gateway.
-    ///         A failure never opens a session and never closes an already open one.
-    /// @throws whatever the gateway throws on a technical failure: nothing is caught here;
-    ///         the UI controller catches it and displaies the error message.
+    /// @brief Starts the login scenario. Returns immediately.
+    /// @param strLogin login as typed by the user. Spaces and case are normalized by UserLogin (domain).
+    /// @param password as typed, [1..MAX_PASSWORD_BYTES] bytes.
+    /// @details Ignored if a login is already running (isBusy()).
+    ///          Bad input: finished(INVALID_INPUT) is emitted at once, the gateway is NOT called.
+    ///          If the gateway throws a std::exception: finished(INVALID_RESPONSE), the use case is free again.
+    ///          Exactly one finished() per accepted execute(). It may be emitted BEFORE execute() returns.
     ///
+    void execute(const std::string& strLogin, const std::string& password);
+
+    /// @brief true between an accepted execute() and its finished().
     [[nodiscard]]
-    LoginOutcome execute(const std::string& strLogin, const std::string& password);
+    bool isBusy() const noexcept;
+
+signals:
+    /// @brief The outcome: a user (login + role, NEVER a token) or an AuthError.
+    void finished(const application::LoginOutcome& outcome);
+
+private slots:
+    void onGatewayFinished(const application::AuthResult& result);
 
 private:
     ISessionGateway& m_gateway;
     SessionManager&  m_session;
+    bool             m_busy = false;
 };
 
 } // namespace application

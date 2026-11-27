@@ -7,8 +7,8 @@
 #include <type_traits>
 
 #include "harness_test.h"
-#include "application/AuthSession.h"
-#include "application/SessionManager.h"
+#include "application/loginusecase/AuthSession.h"
+#include "application/loginusecase/SessionManager.h"
 
 using namespace application;
 
@@ -146,6 +146,18 @@ int main(int argc, char* argv[])
     RUN_TEST(test_SessionManager_CurrentUserIsACopy);
     RUN_TEST(test_SessionManager_ConcurrentAccess);
 
-    if (argc > 1) { writeReport(argv[1], "SessionManager tests"); }
-    return g_failedTests.empty() ? 0 : 1;
+
+    std::cout << "\n==================================================================\n"
+              << g_passedTests.size() << " passed, " << g_failedTests.size() << " failed, "
+              << g_totalChecks << " checks.\n"
+              << "==================================================================\n";
+
+    const std::string reportPath = (argc > 1) ? argv[1] : "session_manager_tests_report.txt";
+    writeReport(reportPath, "SessionManager tests");
+
+    return g_failedTests.empty() ? 0 : 1;   // non-zero exit code => CI fails
+
+
+/*    if (argc > 1) { writeReport(argv[1], "SessionManager tests"); }
+    return g_failedTests.empty() ? 0 : 1; */
 }
