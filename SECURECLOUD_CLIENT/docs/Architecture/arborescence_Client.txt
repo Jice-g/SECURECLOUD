@@ -1,37 +1,45 @@
 
+## Arborescence Client  (mise à jour : 27 novembre 2026, fin de l'implémentation UC1 : Gateway HTTPS)
 
-## Arborescence Client
+Légende :  [ok] = existe dans le dépôt   [à venir] = prévu, pas encore écrit   [démo] = jamais en livraison
 
 SecureCloud-Client/
-├── CMakeLists.txt              # The only build file you need
+├── CMakeLists.txt              # [ok] The only build file you need
 ├── README.md
 ├── LICENSE
 ├── CHANGELOG.md
-├── .gitignore
+├── .gitignore                  # penser à y mettre build/ et dev-ca.pem (jamais de clé privée dans le dépôt)
 ├── .gitattributes
 │
 ├── docs/                       # ADRs, UML, Specs...
 │   ├── school_vision/
 │   ├── specifications/
-│   ├── decisions/
+│   ├── decisions/              # ADR_UC1_Login_Client.md, Contrat_auth_Client-Gateway-Service.md
 │   ├── domain/
 │   ├── architecture/
 │   ├── tests/
-│   └── technics/                 # experimental code
+│   └── technics/               # experimental code, Note_certificat_SC_DEV_CA.md
 │
 ├── assets/                     # Icons, Images, QSS...
 │
 ├── tests/                      # Test files
-│   ├── harness_test.h               # Home-made harness (CHECK, CHECK_THROWS, RUN_TEST)
-│   ├── domain_test/          
-│   │     └── domain_test_1.cpp   # Domain tests (IDs, User, Message, Conversation...)
-│   ├── application_tests/
-│   ├── infrastructure_tests/
-│   ├── integration_tests/
-│   └── spikes/                 # experimental code
+│   ├── harness_test.h                      # [ok] Home-made harness (CHECK, CHECK_THROWS, RUN_TEST)
+│   ├── domain_tests/                       # [ok] cible CMake : run_tests
+│   │     └── domain_test_1.cpp             #      Domain tests (IDs, User, Message, Conversation...)
+│   ├── application_tests/                  # [ok] cibles CMake : run_application_tests, run_session_manager_tests
+│   │     ├── application_test_1.cpp        #      AuthError, AuthSession, AuthResult, LoginUseCase (asynchrone)
+│   │     ├── session_manager_test.cpp      #      SessionManager (aussi sous -fsanitize=thread)
+│   │     └── fakes/
+│   │           └── FakeSessionGateway.h    #      FakeSessionGateway (répond tout de suite) + DeferredSessionGateway (à la main)
+│   ├── infrastructure_tests/               # [à venir] S1b : tests d'AuthJsonMapper (version simple) ; S2 : faux serveur HTTPS
+│   ├── integration_tests/                  # [à venir] S5 : E2E avec la vraie Gateway
+│   └── spikes/                             # experimental code
 │
 └── src/
-    ├── domain/
+    ├── main.cpp                            # [ok] Composition root : SEUL endroit qui connaît toutes les couches
+    │                                       #      (variables SC_GATEWAY_URL, SC_DEV_CA ; vérifie TLS et la config au démarrage)
+    │
+    ├── domain/                             # pur C++, AUCUN Qt  -> bibliothèque sc_domain
     │   ├── model/                  # ← Entities + Value Objects
     │   │   ├── Enums.h
     │   │   ├── TimeStamp.h
@@ -52,39 +60,66 @@ SecureCloud-Client/
     │   │   └── RepositoryError.h
     │   │
     │   └── services/               # ← Pure rules, no I/O
-    │       └── 
+    │       └──
     │
-    ├── application/            
-    │   ├── SendMessageUseCase.h/.cpp
-    │   ├── LoginUserUseCase.h/.cpp
-    │   ├── MessageDTO.h
-    │   ├── UserDTO.h
-    │   ├── ITransport.h        # Port
-    │   ├── ICryptoProvider.h   # Port
-    │   ├── ILocalStorage.h     # Port
-    │   ├── MessageMapper.h/.cpp
-    │   └── SessionManager.h/.cpp
+    ├── application/                        # C++20 + Qt Core seulement (ADR UC1-17) -> bibliothèque sc_application
+    │   ├── gateway/
+    │   │   └── ISessionGateway.h           # [ok] PORT asynchrone : QObject, login() + signal loginFinished(AuthResult)
+    │   ├── loginusecase/                   # UC-01 Connexion
+    │   │   ├── AuthError.h                 # [ok] familles d'échec
+    │   │   ├── AuthResult.h                # [ok] session OU erreur
+    │   │   ├── AuthSession.h               # [ok] jetons + expiration + User
+    │   │   ├── LoginProcessDTO.h           # [ok] LoginRequestDTO, LoginResultDTO
+    │   │   ├── LoginOutcome.h              # [ok] ce que l'UI reçoit (jamais de jeton)
+    │   │   ├── LoginUseCase.h / .cpp       # [ok] QObject asynchrone : execute(), isBusy(), signal finished(LoginOutcome)
+    │   │   └── SessionManager.h / .cpp     # [ok] session en RAM (son std::mutex est devenu inutile : retrait en Roadmap)
+    │   ├── sendmessage_usecase/            # [à venir]
+    │   ├── receivemessage_usecase/         # [à venir]
+    │   ├── alert_useCase/                  # [à venir]
+    │   ├── ITransport.h        # Port      [à venir]
+    │   ├── ICryptoProvider.h   # Port      [à venir]
+    │   ├── ILocalStorage.h     # Port      [à venir]
+    │   └── MessageMapper.h/.cpp            [à venir]
     │
-    ├── infrastructure/         
-    │   ├── WebSocketClient.h/.cpp
-    │   ├── LibSodiumProvider.h/.cpp
-    │   ├── SQLiteRepository.h/.cpp
-    │   └── JwtManager.h/.cpp
+    ├── infrastructure/                     # Qt Core + Network (pas de Widgets) -> bibliothèque sc_infrastructure
+    │   ├── AuthJsonMapper.h / .cpp         # [ok] statut HTTP + JSON  <->  AuthResult (version simple, fonctions static pures)
+    │   ├── GatewayConfig.h / .cpp          # [ok] URL https, CA de dev optionnelle, délai total ; validate()
+    │   ├── HttpsSessionGateway.h / .cpp    # [ok] LA vraie gateway : POST /auth/login, TLS vérifié, sans thread
+    │   │                                   #      (écrit HttpsSessionGateway, avec « s » : l'ancien nom HttpSessionGateway est abandonné)
+    │   ├── DemoSessionGateway.h            # [ok][démo] fausse gateway asynchrone (option CMake SC_DEMO_GATEWAY, OFF par défaut)
+    │   ├── WebSocketClient.h/.cpp          # [à venir]
+    │   ├── LibSodiumProvider.h/.cpp        # [à venir]
+    │   ├── SQLiteRepository.h/.cpp         # [à venir]
+    │   └── JwtManager.h/.cpp               # [à venir]
     │
-    └── ui/                     
-        ├── ChatWindow.h
-        ├── ChatWindow.cpp
-        ├── ChatWindow.ui
-        ├── LoginWindow.h
-        ├── LoginWindow.cpp
-        ├── LoginWindow.ui
-        ├── ContactBookWindow.h
-        ├── ContactBookWindow.cpp
-        ├── ContactBookWindow.ui
-        ├── Attachment.h
-        ├── Attachement.cpp
-        ├── Attachement.ui
-        ├── SettingsWindow.h
-        ├── SettingsWindow.ui
-        ├── MessageListModel.h
-        └── MessageListModel.cpp
+    └── ui/                                 # Qt Widgets (seul main.cpp lie aussi l'infrastructure)
+        ├── Theme.h / .cpp                  # [ok]
+        ├── UiTexts.h / .cpp                # [ok] textes de l'interface (traduisibles)
+        ├── LoginController.h / .cpp        # [ok] glue UI <-> LoginUseCase, SANS thread (signaux loginSucceeded / loginFailed)
+        ├── UserLoginWindow.h / .cpp / .ui  # [ok] fenêtre de connexion (remplace LoginWindow du plan initial)
+        ├── ClientChatWindow.h / .cpp / .ui # [ok] fenêtre principale (remplace ChatWindow du plan initial)
+        ├── ContactBookWindow.h / .cpp / .ui   [à venir]
+        ├── Attachment.h / .cpp / .ui          [à venir]
+        ├── SettingsWindow.h / .ui             [à venir]
+        ├── MessageListModel.h / .cpp          [à venir]
+
+──────────────────────────────────────────────────────────────────────────────
+Dépendances entre couches (CMake) :
+
+    sc_domain  <──  sc_application  <──  sc_infrastructure
+        ^                 ^                    ^
+        └───────── SecureCloud_Client (ui + main.cpp) ─┘   (lie aussi Qt6::Widgets)
+
+    - sc_domain          : aucun Qt
+    - sc_application     : Qt6::Core
+    - sc_infrastructure  : Qt6::Core + Qt6::Network
+    - Les tests (run_tests, run_application_tests, run_session_manager_tests) se construisent même sans la GUI (SC_BUILD_UI=OFF).
+
+Variables d'environnement du Client (ADR UC1-19) :
+    SC_GATEWAY_URL   URL de login, https obligatoire        défaut : https://localhost:8443/auth/login
+    SC_DEV_CA        chemin complet de dev-ca.pem (PEM)     défaut : VIDE (CA du système seulement)
+
+Points à ne pas oublier :
+    - Renommer plus tard run_tests en domain_tests (3 endroits dans CMakeLists.txt : add_executable, target_*, add_test).
+    - Casse des fichiers UI : le CMake cite ClientChatWindow.* alors que les fichiers sont en clientchatwindow.* (sans effet sous Windows, à corriger avant tout build Linux/CI).
+    - ADR UC1-18 (lecture stricte) et UC1-19 (défaut de SC_DEV_CA) à mettre à jour : le mapper est maintenant la version simple et SC_DEV_CA est vide par défaut.
